@@ -23,9 +23,4 @@ public class ReserveTable {
 
     } 
     
-    void PeePooGrandmaRacoon()
-    {
-
-    }
-    
 }
