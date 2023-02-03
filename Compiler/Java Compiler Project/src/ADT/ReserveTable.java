@@ -56,6 +56,7 @@ public class ReserveTable
         }
     }
 
+    //method to print the table to the output file
     public void PrintReserveTable(String filename) 
     {
         //Prints to the named file with the required error catching 
@@ -66,12 +67,12 @@ public class ReserveTable
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
             BufferedWriter writer = new BufferedWriter(outputStreamWriter);
             PrintWriter pw = new PrintWriter(writer);
-            
+
             pw.println("Index   Name    Code");
 
             for(int i = 0; i < names.size(); i++)
             {
-                pw.printf("%d\t%s\t%s\n", i, names.get(i), codes.get(i));
+                pw.printf("%-7d %-5s %5d\n", i, names.get(i), codes.get(i));
             }
             
             pw.close();
