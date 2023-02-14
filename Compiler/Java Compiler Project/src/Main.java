@@ -34,8 +34,8 @@ public class Main {
         System.out.println("Quad row at index 4 is: "+ quadRow[0]+", "+ quadRow[1]+", "+quadRow[2]+", "+quadRow[3]);       
         System.out.println("Finally NextQuad is: "+ quads.NextQuad()); 
 
-        //System.out.println("Printing QuadTable to file "+ args[0]);
-        quads.PrintQuadTable("QuadHW2.txt");
+        System.out.println("Printing QuadTable to file "+ args[0]);
+        quads.PrintQuadTable(args[0]);
                 
 
 
@@ -61,9 +61,8 @@ public class Main {
         index = symbols.LookupSymbol("BadVal");
         System.out.println("BadVal search returned "+index+'\n');
     
-        //System.out.println("Printing SymbolTable to file "+ args[1]);
-
-        symbols.PrintSymbolTable("SymbolHW2.txt");
+        System.out.println("Printing SymbolTable to file "+ args[1]);
+        symbols.PrintSymbolTable(args[1]);
         
     }
 }

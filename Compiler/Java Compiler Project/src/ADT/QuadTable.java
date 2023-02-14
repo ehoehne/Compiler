@@ -8,17 +8,21 @@ public class QuadTable
     private int[][] table;  
     private int nextAvailable;
 
+    //constructor, creates a 2d array with maxSize rows and 4 columns. sets the nextAv to 0
     public QuadTable(int maxSize)
     {
         table = new int[maxSize][4];
         nextAvailable = 0;
     }
-
+    
+    //function to get the next available index in the table
     public int NextQuad()
     {
         return this.nextAvailable;
     }
 
+    //function to add a quad (row) to the table
+    //adds each entered datapoint into its spot in the row. increments the next available index
     public void AddQuad(int opcode, int op1,  int op2, int op3)
     {
         this.table[this.nextAvailable][0] = opcode;
@@ -28,16 +32,21 @@ public class QuadTable
         this.nextAvailable++;
     }
 
+    //function to return a quad (row) of the table
     public int[] GetQuad(int index)
     {
         return this.table[index];
     }
 
+    //updates op3 data point from a specified quad
+    //the assignment only says to do op3, could be modified to do any column
     public void UpdateJump(int index, int op3)
     {
         this.table[index][3] = op3;
     }
 
+    //function to print table to file
+    //formatted to match example
     public void PrintQuadTable(String filename) throws IOException
     {
         try {

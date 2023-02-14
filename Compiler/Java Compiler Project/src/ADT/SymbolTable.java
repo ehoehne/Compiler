@@ -1,39 +1,44 @@
 package ADT;
-
 import java.io.*;
 
+//The only way I could see to do this was to make another class called Symbol, which the SymbolTable class creates an array of.
+//This was required to hold all of the necessary information of different types, since each entry in the array has multiple types and data points.
+//The assignment didn't mention this, but the wording seemed to suggest it, and it was the best (if only) way I could think of. That is why my submission has an extra file.
 public class SymbolTable 
 {
     //private
     private Symbol[] table;
     private int count;
 
+    //constructor
     public SymbolTable(int maxSize)
     {
         table = new Symbol[maxSize];
         count = -1;
     }
 
+    //addsymbol function for integer values
     public int AddSymbol(String name, char usage, int value)
     {
-        int index = LookupSymbol(name);
+        int index = LookupSymbol(name); //check to see if the name is already in the table 
 
-        if(index == -1)
+        if(index == -1) 
         {
-            if(count < (table.length - 1))
+            if(count < (table.length - 1))  //if it isn't, make sure the table isnt full before adding it
             {
                 count++;
-                this.table[count] = new Symbol(name, usage, 'I', value, 0.0, "");
+                this.table[count] = new Symbol(name, usage, 'I', value, 0.0, "");   //create a new row of information with 'I' type, and the entered information
                 index = count;
             }
             else
             {
-                return -1;
+                return -1;  //if the table is full, return -1 and do nothing
             }
         }
-        return index;
+        return index;   //if it's already in the table, return the current index (-1) and do nothing
     }
 
+    //addsymbol function for float values.
     public int AddSymbol(String name, char usage, double value)
     {
         int index = LookupSymbol(name);
@@ -43,7 +48,7 @@ public class SymbolTable
             if(count < (table.length - 1))
             {
                 count++;
-                this.table[count] = new Symbol(name, usage, 'F', 0, value, "");
+                this.table[count] = new Symbol(name, usage, 'F', 0, value, ""); //create a new row of information with 'F' type, and the entered information
                 index = count;
             }
             else
@@ -54,6 +59,7 @@ public class SymbolTable
         return index;
     }
 
+    //addsymbol function for string type
     public int AddSymbol(String name, char usage, String value)
     {
         int index = LookupSymbol(name);
@@ -63,7 +69,7 @@ public class SymbolTable
             if(count < (table.length - 1))
             {
                 count++;
-                this.table[count] = new Symbol(name, usage, 'S', 0, 0.0, value);
+                this.table[count] = new Symbol(name, usage, 'S', 0, 0.0, value);    //create a new row of information with 'S' type, and the entered information
                 index = count;
             }
             else
@@ -74,6 +80,8 @@ public class SymbolTable
         return index;
     }
 
+    //function to search for a name (symbol) in the table 
+    //performs a case-insensitive search and returns the index if found or -1 if not found
     public int LookupSymbol(String symbol)
     {
         int result = -1;
@@ -88,6 +96,7 @@ public class SymbolTable
         return result;
     }
 
+    //functions to update symbols, overloaded for the different types
     public void UpdateSymbol(int index, char usage, int value)
     {
         this.table[index].usage = usage;
@@ -106,6 +115,7 @@ public class SymbolTable
         this.table[index].stringValue = value;
     }
 
+    //functions to get the information data points 
     public String GetSymbol(int index)
     { return this.table[index].name; }
 
@@ -124,6 +134,8 @@ public class SymbolTable
     public String GetString(int index)
     { return this.table[index].stringValue; }
 
+    //print the table to a file
+    //fomatted to match example
     public void PrintSymbolTable(String filename)
     {
         try {
@@ -134,11 +146,16 @@ public class SymbolTable
             BufferedWriter writer = new BufferedWriter(outputStreamWriter);
             PrintWriter pw = new PrintWriter(writer);
 
-            pw.println("Index  Name             Use Typ Value");
+            pw.println("Index  Name                       Use   Type  Value");
 
-            for(int i = 1; i < this.table.length; i++)
+            for(int i = 0; i <= count; i++)
             {
-                pw.printf("%3d  | %25s | %-3c | %-3c", i, this.table[i].name, this.table[i].usage, this.table[i].dataType);
+                if(table[i].dataType == 'I' && table[i].integerValue != 0)
+                    pw.printf("%3d  | %-25s | %-3c | %-3c | %-3d \n", i, this.table[i].name, this.table[i].usage, this.table[i].dataType, this.table[i].integerValue);
+                else if(table[i].dataType == 'S' && table[i].stringValue != null)
+                pw.printf("%3d  | %-25s | %-3c | %-3c | %s \n", i, this.table[i].name, this.table[i].usage, this.table[i].dataType, this.table[i].stringValue);
+                else if(table[i].dataType == 'F' && table[i].floatValue != 0.0)
+                pw.printf("%3d  | %-25s | %-3c | %-3c | %.4f \n", i, this.table[i].name, this.table[i].usage, this.table[i].dataType, this.table[i].floatValue);
             }
 
             pw.close();
