@@ -1,9 +1,7 @@
 package ADT;
 import java.io.*;
 
-//The only way I could see to do this was to make another class called Symbol, which the SymbolTable class creates an array of.
-//This was required to hold all of the necessary information of different types, since each entry in the array has multiple types and data points.
-//The assignment didn't mention this, but the wording seemed to suggest it, and it was the best (if only) way I could think of. That is why my submission has an extra file.
+//implements another class called Symbol, which the SymbolTable class creates an array of.
 public class SymbolTable 
 {
     //private
