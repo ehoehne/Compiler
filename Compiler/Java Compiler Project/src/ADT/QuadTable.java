@@ -20,7 +20,7 @@ public class QuadTable
     {
         return this.nextAvailable;
     }
-
+    
     //function to add a quad (row) to the table
     //adds each entered datapoint into its spot in the row. increments the next available index
     public void AddQuad(int opcode, int op1,  int op2, int op3)

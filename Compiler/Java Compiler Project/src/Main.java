@@ -2,6 +2,10 @@ import ADT.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+
+        //Eli Hoehne CS 4100 Homework 3 Spring 2023
+        System.out.println("Eli Hoehne CS 4100 Homework 3 Spring 2023");
+
         // Expects 6 command-line parameters for filenames, 
         //     see arg[0] through arg[5] below 
         Interpreter interp = new Interpreter();
