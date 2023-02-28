@@ -7,7 +7,7 @@ public class Main {
         System.out.println("Eli Hoehne CS 4100 Homework 3 Spring 2023");
 
         // Expects 6 command-line parameters for filenames, 
-        //     see arg[0] through arg[5] below 
+        // See arg[0] through arg[5] below 
         Interpreter interp = new Interpreter();
         SymbolTable st;
         QuadTable qt;
@@ -30,5 +30,4 @@ public class Main {
         st.PrintSymbolTable(args[4]);
         qt.PrintQuadTable(args[5]);
     }
-    
 }

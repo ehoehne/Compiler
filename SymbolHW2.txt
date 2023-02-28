@@ -1,7 +1,0 @@
-Index  Name                       Use   Type  Value
-  0  | TestInt                   | V   | I   | 27  
-  1  | TestDouble                | V   | F   | 42.2500 
-  2  | TestString                | V   | S   | Nevermind the furthermore... 
-  3  | 135                       | C   | I   | 135 
-  4  | 3.1415                    | C   | F   | 3.1415 
-  5  | Please Enter A Value      | C   | S   | Please Enter A Value 

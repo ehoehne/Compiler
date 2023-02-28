@@ -3,139 +3,193 @@ package ADT;
 import java.io.*;
 import java.util.Scanner;
 
-public class Interpreter {
-    
-    //create reservetable
-    private ReserveTable optable;
+public class Interpreter 
+{
+    //symbolic constants for each of the instructions to be used in interpreter
+    final int STOP = 0;
+    final int DIV = 1;
+    final int MUL = 2;
+    final int SUB = 3;
+    final int ADD = 4;
+    final int MOV = 5;
+    final int PRINT = 6;
+    final int READ = 7;
+    final int JMP = 8;
+    final int JZ = 9;
+    final int JP = 10;
+    final int JN = 11;
+    final int JNZ = 12;
+    final int JNP = 13;
+    final int JNN = 14;
+    final int JINDR = 15;
 
+    //create a reservetable (optable)
+    private ReserveTable optable = new ReserveTable(20);
+
+    //constructor
     public Interpreter()
     {
-        InitReserve(optable);
+        InitReserve(optable);  //intialize reserve table values using InitReserve function
     }
-    
-    //#region Interpreter
-        //this is the interpreter function for each of the quads. This 
-        public void InterpretQuads(QuadTable Q, SymbolTable S, boolean TraceOn, String filename)
-        {   
-            try
-            {
-                //create scanner for READ, create writer to write to file
-                Scanner in = new Scanner(System.in);
-                FileOutputStream outputStream = new FileOutputStream(filename);
-                PrintWriter pw = new PrintWriter(outputStream);
 
-                //start PC at 0, create an array to hold current quad
-                int PC = 0;
-                int[] quad = new int[4];
+    /*
+     *  This is the interpreter function for the instructions described by each line of the quad table
+     *  loops over each line of the quadtable, uses a switch statement to pick the instruction based on 
+     *  the opcode, which is the first numbere in each row of the quadtable. Uses constants to make the 
+     *  switch statement more readable. Has a default case for invalid instruction values.
+     * 
+     *  Prints each trace line to a trace output file using the provided formatting function.
+     *  Performs the required operations for each instruction
+    */
+    public void InterpretQuads(QuadTable Q, SymbolTable S, boolean TraceOn, String filename)
+    {   
+        try
+        {
+            //create scanner for READ, create writer to write to file
+            Scanner in = new Scanner(System.in);
+            FileOutputStream outputStream = new FileOutputStream(filename);
+            PrintWriter pw = new PrintWriter(outputStream);
 
-                while(PC < Q.NextQuad())    //loop until the PC is no longer less than the maxquad
-                {   
-                    quad = Q.GetQuad(PC);   //put the current quad into the quad array, then store each index
-                    int opcode = quad[0];
-                    int op1 = quad[1];
-                    int op2 = quad[2];
-                    int op3 = quad[3];
+            //Required first comment
+            //Eli Hoehne CS 4100 Homework 3 Spring 2023
+            pw.println("Eli Hoehne CS 4100 Homework 3 Spring 2023\n");
 
-                    if(TraceOn)
-                        pw.println(makeTraceString(PC, opcode, op1, op2, op3));     //print the trace string for current quad
+            //start PC at 0, create an array to hold current quad
+            int PC = 0;
+            int[] quad = new int[4];
 
-                    //switches based on the given instruction. 
-                    //performs a different task based on which instruction the current quad is describing
-                    switch(opcode)
-                    {
-                        case 0:     //STOP
-                            System.out.println("Execution terminated by program STOP");
-                            PC = Q.NextQuad();
-                            break;
-                        case 1:     //DIV
-                            S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) / S.GetInteger(op2));
-                            PC++;
-                            break;
-                        case 2:     //MUL
-                            S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) * S.GetInteger(op2));
-                            PC++;
-                            break;
-                        case 3:     //SUB
-                            S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) - S.GetInteger(op2));
-                            PC++;
-                            break;
-                        case 4:     //ADD
-                            S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) + S.GetInteger(op2));
-                            PC++;
-                            break;
-                        case 5:     //MOV
-                            S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1));
-                            PC++;
-                            break;
-                        case 6:     //PRINT
-                            if(S.GetDataType(op3) == 'I')
-                                pw.println(S.GetSymbol(op3) + " = " + S.GetInteger(op3));
-                            else if(S.GetDataType(op3) == 'F')
-                                pw.println(S.GetSymbol(op3) + " = " + S.GetFloat(op3));
-                            else if(S.GetDataType(op3) == 'S')
-                                pw.println(S.GetSymbol(op3) + " = " + S.GetString(op3));
-                            break;
-                        case 7:     //READ
-                            int inVal = in.nextInt();
-                            S.UpdateSymbol(op1, S.GetUsage(op1), inVal);
-                            break;
-                        case 8:     //JMP
+            //loop until the PC is no longer less than the maxquad
+            while(PC < Q.NextQuad())    
+            {   
+                //put the current quad into the quad array, then store each index in a variable for readability
+                quad = Q.GetQuad(PC); 
+                int opcode = quad[0];
+                int op1 = quad[1];
+                int op2 = quad[2];
+                int op3 = quad[3];
+
+                //print the trace string for current quad if TraceOn is true
+                if(TraceOn)
+                    pw.println(makeTraceString(PC, opcode, op1, op2, op3));  
+
+                /*
+                *   Switch statement for each instruction, performs a different task based on which 
+                *   instruction the current quad is describing. 
+                *   this switch implements the instructions how they are described in the IntoToQuads doc,
+                *   using the UpdateSymbol method to update the symbol table with the correct values
+                */
+                switch(opcode)
+                {
+                    case STOP:     
+                        pw.println("Execution terminated by program STOP");
+                        PC = Q.NextQuad();
+                        break;
+
+                    case DIV:     
+                        S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) / S.GetInteger(op2));
+                        PC++;
+                        break;
+
+                    case MUL:     
+                        S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) * S.GetInteger(op2));
+                        PC++;
+                        break;
+
+                    case SUB:     
+                        S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) - S.GetInteger(op2));
+                        PC++;
+                        break;
+
+                    case ADD:     
+                        S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1) + S.GetInteger(op2));
+                        PC++;
+                        break;
+
+                    case MOV:     
+                        S.UpdateSymbol(op3, S.GetUsage(op3), S.GetInteger(op1));
+                        PC++;
+                        break;
+
+                    case PRINT:     
+                        if(S.GetDataType(op3) == 'I')
+                            pw.println(S.GetSymbol(op3) + " = " + S.GetInteger(op3));
+                        else if(S.GetDataType(op3) == 'F')
+                            pw.println(S.GetSymbol(op3) + " = " + S.GetFloat(op3));
+                        else if(S.GetDataType(op3) == 'S')
+                            pw.println(S.GetSymbol(op3) + " = " + S.GetString(op3));
+                        PC++;
+                        break;
+
+                    case READ:     
+                        int inVal = in.nextInt();
+                        S.UpdateSymbol(op1, S.GetUsage(op1), inVal);
+                        break;
+
+                    case JMP:     
+                        PC = op3;
+                        break;
+
+                    case JZ:     
+                        if(S.GetInteger(op1) == 0)
                             PC = op3;
-                            break;
-                        case 9:     //JZ
-                            if(S.GetInteger(op1) == 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 10:    //JP
-                            if(S.GetInteger(op1) > 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 11:    //JN
-                            if(S.GetInteger(op1) < 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 12:    //JNZ
-                            if(S.GetInteger(op1) != 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 13:    //JNP
-                            if(S.GetInteger(op1) <= 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 14:    //JNN
-                            if(S.GetInteger(op1) >= 0)
-                                PC = op3;
-                            else
-                                PC++;
-                            break;
-                        case 15:    //JINDR
-                            PC = S.GetInteger(op3);
-                            break;
-                        default:
-                            pw.println("Invalid opcode");
-                            break;
-                    }
+                        else
+                            PC++;
+                        break;
+
+                    case JP:   
+                        if(S.GetInteger(op1) > 0)
+                            PC = op3;
+                        else
+                            PC++;
+                        break;
+
+                    case JN:   
+                        if(S.GetInteger(op1) < 0)
+                            PC = op3;
+                        else
+                            PC++;
+                        break;
+
+                    case JNZ:    
+                        if(S.GetInteger(op1) != 0)
+                            PC = op3;
+                        else
+                            PC++;
+                        break;
+
+                    case JNP:    
+                        if(S.GetInteger(op1) <= 0)
+                            PC = op3;
+                        else
+                            PC++;
+                        break;
+
+                    case JNN:    
+                        if(S.GetInteger(op1) >= 0)
+                            PC = op3;
+                        else
+                            PC++;
+                        break;
+
+                    case JINDR:    
+                        PC = S.GetInteger(op3);
+                        break;
+
+                    default:
+                        pw.println("Invalid opcode");
+                        break;
                 }
-            in.close();
-            pw.close();
             }
-            catch (IOException e) {
-                e.printStackTrace();
-            }    
+        in.close();
+        pw.close();
         }
-    //#endregion
+        catch (IOException e) {
+            e.printStackTrace();
+        }    
+    }
 
     //adds predetermined opcodes to a reserve table
+    //this function gets called by the Interpreter constructor, adding the instructions to its reserve table
     private void InitReserve(ReserveTable optable)
     {
         optable.Add("STOP", 0);
@@ -157,6 +211,11 @@ public class Interpreter {
     }
 
     //#region FactorialInit
+        /*
+         *  Functions in this region handle the initialization of the factorial Symbol and Quad tables.
+         *  Adds values to each based on given content
+         */
+
         //intialize the factorial test
         public boolean initializeFactorialTest(SymbolTable stable, QuadTable qtable) 
         {
@@ -191,6 +250,13 @@ public class Interpreter {
     //#endregion
 
     //#region SummationInit
+        /*
+         *  Functions in this region handle the initialization of the summation Symbol and Quad tables.
+         *  Adds values to each based on given content
+         *  The only difference from the factorial tables is that this Quad table uses another ADD instruction
+         *  as opposed to a MUL instruction
+         */
+
         //initialize the summation test
         public boolean initializeSummationTest(SymbolTable stable, QuadTable qtable) 
         {
@@ -216,7 +282,7 @@ public class Interpreter {
             qt.AddQuad(5, 3, 0, 1);     //MOV
             qt.AddQuad(3, 1, 0, 4);     //SUB
             qt.AddQuad(10, 4, 0, 7);    //JP
-            qt.AddQuad(2, 2, 1, 2);     //MUL
+            qt.AddQuad(4, 2, 1, 2);     //ADD
             qt.AddQuad(4, 1, 3, 1);     //ADD
             qt.AddQuad(8, 0, 0, 2);     //JMP
             qt.AddQuad(6, 0, 0, 2);     //PRINT
@@ -224,7 +290,7 @@ public class Interpreter {
         }
     //#endregion
     
-    //creates and returns a string using the provided information about the current trace. given. 
+    //creates and returns a string using the provided information about the current trace. This function was given.
     private String makeTraceString(int pc, int opcode,int op1,int op2,int op3 )
     {
         String result = "";
