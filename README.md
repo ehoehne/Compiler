@@ -7,8 +7,8 @@ Contains all the files for the Compiler developed in CS 4100
 `src` folder contains all of the source files\
     - `ADT` folder contains Abstract Data Types\
         - `Interpreter`\
-        - `QuadTable`\ 
-        - `ReserveTable`\ 
+        - `QuadTable`\
+        - `ReserveTable`\
         - `Symbol`\
         - `SymbolTable`\
 `out` folder should contain all of the output `.txt` files created by the compiler\
