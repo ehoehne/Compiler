@@ -1,0 +1,50 @@
+
+
+
+
+{Here is Lexical Test file 1 # *) which 
+  has a comment that
+  spans 3 lines, followed by an empty comment }
+{}
+
+amount:=1;
+b:=a+b-c*21.7/22;
+     123456789112345 (*this number is 15 chars, truncate int to 6 *)
+     12.34567891134567 (*this number is 17 chars, but should be 
+	                     truncated to 12 in the symbol table*)
+hereisareallylongidentifierthatistoolong := 66;
+hereisareallylongidentifierthatissameasabovewhentruncated := 76.5E-12;
+  109.E+10      12.33E5 
+  12.4 E-2
+  
+   *) {<--Orphaned closed comment is just '*' and ')' returned as separate tokens}
+           myString_1 : = "an unfinished string makes an error ;
+  test single #and two char tokens 
+     # /*^&%+-  some more (   ) (**) ;:=><>=<==<>,[]:.
+(* mixed in reserve words 
+below........................... *)  "but first is a good string"
+  GOTO JumpOut;  INTEGER TO DO
+	begin  if not then that else nothing
+THEN ELSE
+For I := 1 to 100.E7 of float do
+    WRITELN
+    BEGIN
+    END
+  declare  ARRAY 
+   VAR DOWHILE  module UNIT Label  RePeaT  UNTIL done = TRUE;
+
+ PROCEDURE  FUNCTION DOWNTO does READLN   RETURN
+	FLOAT
+	STRING
+
+Beginning not reserve writeln.   !@#$%^&*()_+
+sum := 0.0;
+sum := sum + 2;
+What if 2. is found?
+
+(* end of file comes
+   before the end of this 
+   comment-- Throw an Error!
+
+
+                     

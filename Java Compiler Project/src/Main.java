@@ -3,31 +3,26 @@ import ADT.*;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        //Eli Hoehne CS 4100 Homework 3 Spring 2023
-        System.out.println("Eli Hoehne CS 4100 Homework 3 Spring 2023");
+        //Eli Hoehne CS 4100 Spring 2023
+        System.out.println("Eli Hoehne CS 4100 Part 2 Spring 2023");
 
-        // Expects 6 command-line parameters for filenames, 
-        // See arg[0] through arg[5] below 
-        Interpreter interp = new Interpreter();
-        SymbolTable st;
-        QuadTable qt;
-        
-        // interpretation FACTORIAL
-        st = new SymbolTable(20);     //Create an empty SymbolTable
-        qt = new QuadTable(20);       //Create an empty QuadTable
-        System.out.println("This program expects command-line parameters for filenames in this order:");
-        System.out.println("traceFactorial SymbolFactorial QuadFactorial traceSum SymbolSum QuadSum");
-        interp.initializeFactorialTest(st,qt);  //Set up for FACTORIAL
-        interp.InterpretQuads(qt, st, true, args[0]);
-        st.PrintSymbolTable(args[1]);
-        qt.PrintQuadTable(args[2]);
-
-        // interpretation SUMMATION
-        st = new SymbolTable(20);     //Create an empty SymbolTable
-        qt = new QuadTable(20);       //Create an empty QuadTable
-        interp.initializeSummationTest(st,qt);  //Set up for SUMMATION
-        interp.InterpretQuads(qt, st, true, args[3]);
-        st.PrintSymbolTable(args[4]);
-        qt.PrintQuadTable(args[5]);
+        String inFileAndPath = args[0];
+        String outFileAndPath = args[1];
+        System.out.println("Lexical for " + inFileAndPath);
+        boolean traceOn = true;
+        // Create a symbol table to store appropriate3 symbols found
+        SymbolTable symbolList;
+        symbolList = new SymbolTable(150);
+        Lexical myLexer = new Lexical(inFileAndPath, symbolList,traceOn);
+        Lexical.token currToken;
+        //LexicalReserve myLexer = new LexicalReserve(inFileAndPath, symbolList, traceOn);
+        //LexicalReserve.token currToken;
+        currToken = myLexer.GetNextToken();
+        while (currToken != null) {
+            System.out.println("\t" + currToken.mnemonic + " | \t" + String.format("%04d", currToken.code) + " | \t" + currToken.lexeme);
+            currToken = myLexer.GetNextToken();
+        }
+        symbolList.PrintSymbolTable(outFileAndPath);
+        System.out.println("Done.");
     }
 }
