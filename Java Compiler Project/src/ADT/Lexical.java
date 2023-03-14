@@ -24,6 +24,8 @@ public class Lexical
     //symbolic constants
     static final int NOT_FOUND = -1;
     static final int MAX_IDENT_LEN = 20;
+    static final int MAX_INT_LEN = 6;
+    static final int MAX_FLOAT_LEN = 12;
 
     //constructor
     public Lexical(String filename, SymbolTable symbols, boolean echoOn) 
@@ -407,18 +409,32 @@ public class Lexical
 
         while((isDigit(ch)) || ch == '.'){
             result.lexeme = result.lexeme + ch; //extend lexeme
-            if(ch == '.'){  //if current char is '.' (floating point)
-                ch = GetNextChar();   
-                if(ch == 'E'){        //if the next char after the period is an 'E', add it
-                    result.lexeme = result.lexeme + ch;
-                }
-                else if(isDigit(ch)){   //if its not an 'E' but is still a digit, add it
+            if(result.lexeme.contains(".")){  //if lexeme has picked up a '.' so far
+                if(PeekNextChar() == 'E' || isDigit(PeekNextChar())){   //If the next char is an E or a digit
+                    ch = GetNextChar();
                     result.lexeme = result.lexeme + ch;
                 }
             }
             ch = GetNextChar();
         }
 
+        if(result.lexeme.contains("."))
+        {
+            if(result.lexeme.length() > MAX_FLOAT_LEN){
+                consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 12");
+                result.lexeme = result.lexeme.substring(0, MAX_FLOAT_LEN);
+                saveSymbols.AddSymbol(result.lexeme, 'V', result.lexeme); //need to update this to compute the exponent if contains E
+            }
+            else{
+                
+            }
+        }
+        else{
+            if(result.lexeme.length() > MAX_INT_LEN){
+                consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 6");
+                result.lexeme = result.lexeme.substring(0, MAX_INT_LEN);
+            }
+        }
 
         return result;
     }
