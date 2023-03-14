@@ -367,15 +367,15 @@ public class Lexical
 
     }
 
-    private token getIdentifier(char ch) 
+    private token getIdentifier() 
     {
         token result = new token();
-        result.lexeme = "" + ch; //have the first char
-        ch = GetNextChar();
+        result.lexeme = "" + currCh; //have the first char
+        currCh = GetNextChar();
         //loop until no more characters in the input
-        while (isLetter(ch) || (isDigit(ch))) {
-            result.lexeme = result.lexeme + ch; //extend lexeme
-            ch = GetNextChar();
+        while (isLetter(currCh) || (isDigit(currCh))) {
+            result.lexeme = result.lexeme + currCh; //extend lexeme
+            currCh = GetNextChar();
         }
         // end of token, lookup or IDENT
         result.code = reserveWords.LookupName(result.lexeme);
@@ -401,21 +401,21 @@ public class Lexical
         return result;
     }
 
-    private token getNumber(char ch) {
+    private token getNumber() {
         /* a number is:   <digit>+[.<digit>*[E<digit>+]] */ 
         token result = new token();
-        result.lexeme = "" + ch; //have the first char
-        ch = GetNextChar();
+        result.lexeme = "" + currCh; //have the first char
+        currCh = GetNextChar();
 
-        while((isDigit(ch)) || ch == '.'){
-            result.lexeme = result.lexeme + ch; //extend lexeme
+        while((isDigit(currCh)) || currCh == '.'){
+            result.lexeme = result.lexeme + currCh; //extend lexeme
             if(result.lexeme.contains(".")){  //if lexeme has picked up a '.' so far
                 if(PeekNextChar() == 'E' || isDigit(PeekNextChar())){   //If the next char is an E or a digit
-                    ch = GetNextChar();
-                    result.lexeme = result.lexeme + ch;
+                    currCh = GetNextChar();
+                    result.lexeme = result.lexeme + currCh;
                 }
             }
-            ch = GetNextChar();
+            currCh = GetNextChar();
         }
 
         if(result.lexeme.contains("."))
@@ -423,16 +423,28 @@ public class Lexical
             if(result.lexeme.length() > MAX_FLOAT_LEN){
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 12");
                 result.lexeme = result.lexeme.substring(0, MAX_FLOAT_LEN);
-                saveSymbols.AddSymbol(result.lexeme, 'V', result.lexeme); //need to update this to compute the exponent if contains E
+                if(result.lexeme.contains("E")){
+                    //double dval = Double.parseDouble(result.lexeme.substring(0, result.lexeme.indexOf('E')));   //return the part of the string before E
+                    //double exp =  Double.parseDouble(result.lexeme.substring(result.lexeme.indexOf('E')) + 1);  //return the part of the string after E
+                    String[] split = result.lexeme.split("E");
+                    saveSymbols.AddSymbol(result.lexeme, 'V', Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1]))); //compute the exponent and add to symbol table
+                }
+                else{
+                    saveSymbols.AddSymbol(result.lexeme, 'V', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
+                }
             }
             else{
-                
+                saveSymbols.AddSymbol(result.lexeme, 'V', Double.parseDouble(result.lexeme));
             }
         }
         else{
             if(result.lexeme.length() > MAX_INT_LEN){
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 6");
                 result.lexeme = result.lexeme.substring(0, MAX_INT_LEN);
+                saveSymbols.AddSymbol(result.lexeme, 'C', Integer.parseInt(result.lexeme));
+            }
+            else{
+                saveSymbols.AddSymbol(result.lexeme, 'C', Integer.parseInt(result.lexeme));
             }
         }
 
@@ -478,9 +490,9 @@ public class Lexical
 
         currCh = skipWhiteSpace();
         if (isLetter(currCh)) { //is identifier
-            result = getIdentifier(currCh);
+            result = getIdentifier();
         } else if (isDigit(currCh)) { //is numeric
-            result = getNumber(currCh);
+            result = getNumber();
         } else if (isStringStart(currCh)) { //string literal
             result = getString();
         } else //default char checks
