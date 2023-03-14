@@ -21,6 +21,10 @@ public class Lexical
     private ReserveTable reserveWords = new ReserveTable(sizeReserveTable);     //a few more than # reserves
     private ReserveTable mnemonics = new ReserveTable(sizeReserveTable);        //a few more than # reserves
 
+    //symbolic constants
+    static final int NOT_FOUND = -1;
+    static final int MAX_IDENT_LEN = 20;
+
     //constructor
     public Lexical(String filename, SymbolTable symbols, boolean echoOn) 
     {
@@ -52,8 +56,8 @@ public class Lexical
     }
 
     // inner class "token" is declared here, no accessors needed
-    public class token {
-
+    public class token 
+    {
         public String lexeme;
         public int code;
         public String mnemonic;
@@ -65,10 +69,13 @@ public class Lexical
         }
     }
 
-    /* @@@ */
+    /*
+     * The initialization method for the lexical ReserveWords reserve table.
+     * This one inlcludes all of the given identifiers and codes for the 
+     * full and 1-2 char instructions.
+    */
     private void initReserveWords(ReserveTable reserveWords) 
     {
-        // Student must provide the rest
         reserveWords.Add("GOTO",      0);
         reserveWords.Add("INTEGER",   1);
         reserveWords.Add("TO",        2);
@@ -119,26 +126,30 @@ public class Lexical
         reserveWords.Add(" ",  99);
     }
 
-    /* @@@ */
+    /*
+     * This is the initialization method for the lexical mnemonics reserve table.
+     * Inludes 5 character mnemonics for all of the same instructions, for both 
+     * the full word instructions and for the 1-2 char ones. 
+    */
     private void initMnemonics(ReserveTable mnemonics) 
     {
         // Student must create their own 5-char mnemonics
-        mnemonics.Add("GOTO",  0);
+        mnemonics.Add("_GOTO", 0);
         mnemonics.Add("INTGR", 1);
-        mnemonics.Add("TO",    2);
-        mnemonics.Add("DO",    3);
-        mnemonics.Add("IF",    4);
-        mnemonics.Add("THEN",  5);
-        mnemonics.Add("ELSE",  6);
-        mnemonics.Add("FOR",   7);
-        mnemonics.Add("OF",    8);
+        mnemonics.Add("___TO", 2);
+        mnemonics.Add("___DO", 3);
+        mnemonics.Add("___IF", 4);
+        mnemonics.Add("_THEN", 5);
+        mnemonics.Add("_ELSE", 6);
+        mnemonics.Add("__FOR", 7);
+        mnemonics.Add("___OF", 8);
         mnemonics.Add("WRILN", 9);
         mnemonics.Add("REALN", 10);
         mnemonics.Add("BEGIN", 11);
-        mnemonics.Add("END",   12);
-        mnemonics.Add("VAR",   13);
+        mnemonics.Add("__END", 12);
+        mnemonics.Add("__VAR", 13);
         mnemonics.Add("DOWHL", 14);
-        mnemonics.Add("UNIT",  15);
+        mnemonics.Add("_UNIT", 15);
         mnemonics.Add("LABEL", 16);
         mnemonics.Add("RPEAT", 17);
         mnemonics.Add("UNTIL", 18);
@@ -152,43 +163,26 @@ public class Lexical
 
         //1 and 2-char
         mnemonics.Add("BSLSH", 30);
-        mnemonics.Add("MULT",  31);
-        mnemonics.Add("ADD",   32);
-        mnemonics.Add("SUB",   33);
+        mnemonics.Add("_MULT", 31);
+        mnemonics.Add("__ADD", 32);
+        mnemonics.Add("__SUB", 33);
         mnemonics.Add("LPREN", 34);
         mnemonics.Add("RPREN", 35);
         mnemonics.Add("SCOLN", 36);
         mnemonics.Add("ASIGN", 37);
-        mnemonics.Add("GRTR",  38);
-        mnemonics.Add("LESS",  39);
+        mnemonics.Add("_GRTR", 38);
+        mnemonics.Add("_LESS", 39);
         mnemonics.Add("GREQL", 40);
-        mnemonics.Add("LEQL",  41);
+        mnemonics.Add("LSEQL", 41);
         mnemonics.Add("EQUAL", 42);
         mnemonics.Add("NTEQL", 43);
         mnemonics.Add("COMMA", 44);
         mnemonics.Add("LBRKT", 45);
         mnemonics.Add("RBRKT", 46);
         mnemonics.Add("COLON", 47);
-        mnemonics.Add("DOT",   48);
+        mnemonics.Add("__DOT", 48);
+        mnemonics.Add("IDENT", 50);
         mnemonics.Add("OTHER", 99);
-    }
-
-    private token getIdentifier(char ch){
-        token result = new token();
-        result.lexeme = "" + ch; //have the first char
-        ch = GetNextChar();
-        //NOTE: Below is not complete for F22 identifier definition
-        while (isLetter(ch)||(isDigit(ch))) {
-        result.lexeme = result.lexeme + ch; //extend lexeme
-        ch = GetNextChar();
-        }
-        // end of token, lookup or IDENT
-        result.code = mnemonics.LookupName(result.lexeme);
-        //if (result.code == -1)      //magic number?
-            //result.code = IDENT_ID;   //fix this
-        // Identifiers need to be added to the symbol table after truncation
-        //as needed
-        return result;
     }
 
     // ******************* PUBLIC USEFUL METHODS
@@ -197,10 +191,10 @@ public class Lexical
     public int codeFor(String mnemonic) {
         return mnemonics.LookupName(mnemonic);
     }
-    // given a mnemonic, return its reserve word
 
+    // given a mnemonic, return its reserve word
     public String reserveFor(String mnemonic) {
-        return mnemonics.LookupCode(mnemonics.LookupName(mnemonic));
+        return reserveWords.LookupCode(mnemonics.LookupName(mnemonic));
     }
 
     // Public access to the current End Of File status
@@ -334,7 +328,6 @@ public class Lexical
                     curr = GetNextChar();          //must get following
                 }
             }
-
         }
         return (curr);
     }
@@ -372,14 +365,62 @@ public class Lexical
 
     }
 
-    private token getIdentifier() {
+    private token getIdentifier(char ch) 
+    {
+        token result = new token();
+        result.lexeme = "" + ch; //have the first char
+        ch = GetNextChar();
+        //loop until no more characters in the input
+        while (isLetter(ch) || (isDigit(ch))) {
+            result.lexeme = result.lexeme + ch; //extend lexeme
+            ch = GetNextChar();
+        }
+        // end of token, lookup or IDENT
+        result.code = reserveWords.LookupName(result.lexeme);
+        //if the lexeme is not a reserved word, give it the identifer code and mnemonic
+        if (result.code == NOT_FOUND){
+            result.code = codeFor("IDENT");
+            result.mnemonic = "IDENT";
+            //if lexeme is longer than 20, truncate it, print an error, and add it to the symbol table
+            //else, add it to the symbol table untouched
+            if(result.lexeme.length() > MAX_IDENT_LEN){
+                consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 20");
+                result.lexeme = result.lexeme.substring(0, MAX_IDENT_LEN);
+                saveSymbols.AddSymbol(result.lexeme, 'V', 0);
+            }
+            else{
+                saveSymbols.AddSymbol(result.lexeme, 'V', 0);
+            }
+        }
+        else{
+            result.mnemonic = mnemonics.LookupCode(result.code);
+        }
 
-        return dummyGet();
+        return result;
     }
 
-    private token getNumber() {
-        /* a number is:   <digit>+[.<digit>*[E<digit>+]] */
-        return dummyGet();
+    private token getNumber(char ch) {
+        /* a number is:   <digit>+[.<digit>*[E<digit>+]] */ 
+        token result = new token();
+        result.lexeme = "" + ch; //have the first char
+        ch = GetNextChar();
+
+        while((isDigit(ch)) || ch == '.'){
+            result.lexeme = result.lexeme + ch; //extend lexeme
+            if(ch == '.'){  //if current char is '.' (floating point)
+                ch = GetNextChar();   
+                if(ch == 'E'){        //if the next char after the period is an 'E', add it
+                    result.lexeme = result.lexeme + ch;
+                }
+                else if(isDigit(ch)){   //if its not an 'E' but is still a digit, add it
+                    result.lexeme = result.lexeme + ch;
+                }
+            }
+            ch = GetNextChar();
+        }
+
+
+        return result;
     }
 
     private token getString() {
@@ -421,9 +462,9 @@ public class Lexical
 
         currCh = skipWhiteSpace();
         if (isLetter(currCh)) { //is identifier
-            result = getIdentifier();
+            result = getIdentifier(currCh);
         } else if (isDigit(currCh)) { //is numeric
-            result = getNumber();
+            result = getNumber(currCh);
         } else if (isStringStart(currCh)) { //string literal
             result = getString();
         } else //default char checks
@@ -443,8 +484,5 @@ public class Lexical
             }
         }
         return result;
-
     }
-
-
 }

@@ -23,7 +23,7 @@ public class ReserveTable
     }
     
     //method to search for an element using the name, case insensitive search
-    //will return the index if found, or -1 if not found
+    //will return the code if found, or -1 if not found
     public int LookupName(String name) 
     {
         int i = 0;
@@ -42,7 +42,7 @@ public class ReserveTable
     }
 
     //method to search for an element using the code
-    //will return the index if found, or "" if not found;
+    //will return the name if found, or "" if not found;
     public String LookupCode(int code) 
     {
         if(this.codes.contains(code))
