@@ -205,7 +205,6 @@ public class Lexical
     }
 
     // DEBUG enabler, turns on/OFF token printing inside of GetNextToken
-
     public void setPrintToken(boolean on) {
         printToken = on;
     }
@@ -382,7 +381,6 @@ public class Lexical
         //if the lexeme is not a reserved word, give it the identifer code and mnemonic
         if (result.code == NOT_FOUND){
             result.code = codeFor("IDENT");
-            result.mnemonic = "IDENT";
             //if lexeme is longer than 20, truncate it, print an error, and add it to the symbol table
             //else, add it to the symbol table untouched
             if(result.lexeme.length() > MAX_IDENT_LEN){
@@ -418,26 +416,34 @@ public class Lexical
             currCh = GetNextChar();
         }
 
+        //check if the lexeme is a floating point 
         if(result.lexeme.contains("."))
         {
-            if(result.lexeme.length() > MAX_FLOAT_LEN){
+            result.code = codeFor("FLOAT");
+            //check if its longer than 12. If so, print error, truncate and add to symbol table
+            if(result.lexeme.length() > MAX_FLOAT_LEN){ 
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 12");
                 result.lexeme = result.lexeme.substring(0, MAX_FLOAT_LEN);
-                if(result.lexeme.contains("E")){
-                    //double dval = Double.parseDouble(result.lexeme.substring(0, result.lexeme.indexOf('E')));   //return the part of the string before E
-                    //double exp =  Double.parseDouble(result.lexeme.substring(result.lexeme.indexOf('E')) + 1);  //return the part of the string after E
-                    String[] split = result.lexeme.split("E");
-                    saveSymbols.AddSymbol(result.lexeme, 'V', Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1]))); //compute the exponent and add to symbol table
+                if(result.lexeme.contains("E")){    //check if it has an exponent component
+                    String[] split = result.lexeme.split("E");  //use split mathod to spit it around E
+                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.4f", Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1])))); //compute the exponent and add to symbol table
                 }
-                else{
-                    saveSymbols.AddSymbol(result.lexeme, 'V', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
+                else{   //if it doesnt have an exponent, just add it to symbol table
+                    saveSymbols.AddSymbol(result.lexeme, 'C', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
                 }
             }
-            else{
-                saveSymbols.AddSymbol(result.lexeme, 'V', Double.parseDouble(result.lexeme));
+            else{   //if its not longer than 20. 
+                if(result.lexeme.contains("E")){    //check if it has an exponent component
+                    String[] split = result.lexeme.split("E");  //use split method to spit it around E
+                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.4f", Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1])))); //compute the exponent and add to symbol table
+                }
+                else{   //if it doesnt have an exponent, just add it to symbol table
+                    saveSymbols.AddSymbol(result.lexeme, 'C', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
+                }
             }
         }
         else{
+            result.code = codeFor("INTGR");
             if(result.lexeme.length() > MAX_INT_LEN){
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 6");
                 result.lexeme = result.lexeme.substring(0, MAX_INT_LEN);
@@ -447,12 +453,28 @@ public class Lexical
                 saveSymbols.AddSymbol(result.lexeme, 'C', Integer.parseInt(result.lexeme));
             }
         }
-
         return result;
     }
 
     private token getString() {
-        return dummyGet();
+        token result = new token();
+        result.lexeme = "" + currCh; //have the first char
+        currCh = GetNextChar();
+
+        while(currCh != '"'){
+            if(currCh == '\n'){
+                consoleShowError("Line ended before string");
+                result.lexeme = "";
+                return result;
+            }
+            else{
+                result.lexeme = result.lexeme + currCh;
+                currCh = GetNextChar();
+            }
+        }
+        result.code = codeFor("STRNG");
+        saveSymbols.AddSymbol(result.lexeme, 'C', result.lexeme);
+        return result;
     }
 
     private token getOtherToken() {
@@ -504,9 +526,8 @@ public class Lexical
             result = null;
         }
         //set the mnemonic
-        if (result != null) {
-            // THIS LINE REMOVED-- PUT BACK IN TO USE LOOKUP            
-            // result.mnemonic = mnemonics.LookupCode(result.code);
+        if (result != null) {            
+            result.mnemonic = mnemonics.LookupCode(result.code);
             if (printToken) {
                 System.out.println("\t" + result.mnemonic + " | \t" + String.format("%04d", result.code) + " | \t" + result.lexeme);
             }
