@@ -183,8 +183,10 @@ public class Lexical
         mnemonics.Add("RBRKT", 46);
         mnemonics.Add("COLON", 47);
         mnemonics.Add("__DOT", 48);
+
+        //Any other mnemonics
         mnemonics.Add("IDENT", 50);
-        mnemonics.Add("OTHER", 99);
+        mnemonics.Add("UNDEF", 99);
     }
 
     // ******************* PUBLIC USEFUL METHODS
@@ -392,34 +394,38 @@ public class Lexical
                 saveSymbols.AddSymbol(result.lexeme, 'V', 0);
             }
         }
-        else{
-            result.mnemonic = mnemonics.LookupCode(result.code);
-        }
 
         return result;
     }
 
     private token getNumber() {
-        /* a number is:   <digit>+[.<digit>*[E<digit>+]] */ 
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
 
-        while((isDigit(currCh)) || currCh == '.'){
-            result.lexeme = result.lexeme + currCh; //extend lexeme
-            if(result.lexeme.contains(".")){  //if lexeme has picked up a '.' so far
-                if(PeekNextChar() == 'E' || isDigit(PeekNextChar())){   //If the next char is an E or a digit
-                    currCh = GetNextChar();
-                    result.lexeme = result.lexeme + currCh;
-                }
-            }
+        while(isDigit(currCh)){
+            result.lexeme = result.lexeme + currCh; //extend lexeme 
             currCh = GetNextChar();
         }
+        if(currCh == '.'){
+            result.lexeme = result.lexeme + currCh; //add the '.' to lexeme
+            currCh = GetNextChar();
+            while(isDigit(currCh)){
+                result.lexeme = result.lexeme + currCh; //extend lexeme
+                currCh = GetNextChar();
+            }
+            if(currCh == 'E'){
+                result.lexeme = result.lexeme + currCh; //add the 'E' to the lexeme
+                currCh = GetNextChar();
+                while(isDigit(currCh)){
+                    result.lexeme = result.lexeme + currCh; //extend lexeme
+                currCh = GetNextChar();
+                }
+            }
 
-        //check if the lexeme is a floating point 
-        if(result.lexeme.contains("."))
-        {
+            //at this point, entire lexeme has been gathered and is a floating point number
             result.code = codeFor("FLOAT");
+
             //check if its longer than 12. If so, print error, truncate and add to symbol table
             if(result.lexeme.length() > MAX_FLOAT_LEN){ 
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 12");
@@ -442,7 +448,8 @@ public class Lexical
                 }
             }
         }
-        else{
+        else    //original loop only gathered digits and then exited, meaning lexeme is an integer
+        {
             result.code = codeFor("INTGR");
             if(result.lexeme.length() > MAX_INT_LEN){
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 6");
@@ -463,7 +470,7 @@ public class Lexical
 
         while(currCh != '"'){
             if(currCh == '\n'){
-                consoleShowError("Line ended before string");
+                consoleShowError("Unterminated string found");
                 result.lexeme = "";
                 return result;
             }
@@ -478,6 +485,8 @@ public class Lexical
     }
 
     private token getOtherToken() {
+        //token result = new token();
+
         return dummyGet();
     }
 
