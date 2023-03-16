@@ -164,7 +164,7 @@ public class Lexical
         mnemonics.Add("ARRAY", 25);
 
         //1 and 2-char
-        mnemonics.Add("BSLSH", 30);
+        mnemonics.Add("DIVID", 30);
         mnemonics.Add("_MULT", 31);
         mnemonics.Add("__ADD", 32);
         mnemonics.Add("__SUB", 33);
@@ -493,8 +493,7 @@ public class Lexical
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
-
-        while(!isWhitespace(currCh)){
+        while(!isWhitespace(currCh) && !isLetter(currCh) && !isDigit(currCh)){
             if(isPrefix(currCh)){
                 result.lexeme = result.lexeme + currCh; //extend lexeme
                 if(PeekNextChar() == '=' || PeekNextChar() == '>'){ //if the next character is a suffix
@@ -502,8 +501,8 @@ public class Lexical
                     result.lexeme = result.lexeme + currCh; //extend lexeme with suffix
                 }
             }
-            else{
-                result.lexeme = result.lexeme + currCh; //extend lexeme
+            else{    
+                result.lexeme = result.lexeme + currCh; //extend lexeme    
                 currCh = GetNextChar();
             }
         }
