@@ -7,8 +7,8 @@ public class Main
         //Eli Hoehne CS 4100 Spring 2023
         System.out.println("Eli Hoehne CS 4100 Part 2 Spring 2023");
 
-        String inFileAndPath = args[0];
-        String outFileAndPath = args[1];
+        String inFileAndPath = "LexicalTestSP23.txt";
+        String outFileAndPath = "LexicalOutput.txt";
         System.out.println("Lexical for " + inFileAndPath);
         boolean traceOn = true;
         // Create a symbol table to store appropriate3 symbols found

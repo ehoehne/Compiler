@@ -358,16 +358,6 @@ public class Lexical
     //global char
     char currCh;
 
-    private token dummyGet() {
-        token result = new token();
-        result.lexeme = "" + currCh; //have the first char
-        currCh = GetNextChar();
-        result.code = 0;
-        result.mnemonic = "DUMY";
-        return result;
-
-    }
-
     private token getIdentifier() 
     {
         token result = new token();
@@ -398,7 +388,8 @@ public class Lexical
         return result;
     }
 
-    private token getNumber() {
+    private token getNumber() 
+    {
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
@@ -432,7 +423,13 @@ public class Lexical
                 result.lexeme = result.lexeme.substring(0, MAX_FLOAT_LEN);
                 if(result.lexeme.contains("E")){    //check if it has an exponent component
                     String[] split = result.lexeme.split("E");  //use split mathod to spit it around E
-                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.4f", Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1])))); //compute the exponent and add to symbol table
+                    double val;
+                    if(split.length > 1){
+                        val = Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
+                    }else{
+                        val = Double.parseDouble(split[0]);
+                    }
+                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.1f", val)); //add to symbol table
                 }
                 else{   //if it doesnt have an exponent, just add it to symbol table
                     saveSymbols.AddSymbol(result.lexeme, 'C', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
@@ -441,7 +438,13 @@ public class Lexical
             else{   //if its not longer than 20. 
                 if(result.lexeme.contains("E")){    //check if it has an exponent component
                     String[] split = result.lexeme.split("E");  //use split method to spit it around E
-                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.4f", Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1])))); //compute the exponent and add to symbol table
+                    double val;
+                    if(split.length > 1){
+                        val = Math.pow(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
+                    }else{
+                        val = Double.parseDouble(split[0]);
+                    }
+                    saveSymbols.AddSymbol(result.lexeme, 'C', String.format("%.1f", val)); //add to symbol table
                 }
                 else{   //if it doesnt have an exponent, just add it to symbol table
                     saveSymbols.AddSymbol(result.lexeme, 'C', Double.parseDouble(result.lexeme));   //get the double value from the lexeme and add to symbol table
@@ -463,7 +466,8 @@ public class Lexical
         return result;
     }
 
-    private token getString() {
+    private token getString() 
+    {
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
@@ -471,7 +475,7 @@ public class Lexical
         while(currCh != '"'){
             if(currCh == '\n'){
                 consoleShowError("Unterminated string found");
-                result.lexeme = "";
+                result.code = codeFor("UNDEF");
                 return result;
             }
             else{
@@ -484,10 +488,33 @@ public class Lexical
         return result;
     }
 
-    private token getOtherToken() {
-        //token result = new token();
+    private token getOtherToken() 
+    {
+        token result = new token();
+        result.lexeme = "" + currCh; //have the first char
+        currCh = GetNextChar();
 
-        return dummyGet();
+        while(!isWhitespace(currCh)){
+            if(isPrefix(currCh)){
+                result.lexeme = result.lexeme + currCh; //extend lexeme
+                if(PeekNextChar() == '=' || PeekNextChar() == '>'){ //if the next character is a suffix
+                    currCh = GetNextChar(); //get the suffix
+                    result.lexeme = result.lexeme + currCh; //extend lexeme with suffix
+                }
+            }
+            else{
+                result.lexeme = result.lexeme + currCh; //extend lexeme
+                currCh = GetNextChar();
+            }
+        }
+
+        result.code = reserveWords.LookupName(result.lexeme);
+
+        if(result.code == NOT_FOUND){
+            result.code = codeFor("UNDEF");
+        }
+
+        return result;
     }
 
     // Checks to see if a string contains a valid DOUBLE 
@@ -526,8 +553,7 @@ public class Lexical
             result = getNumber();
         } else if (isStringStart(currCh)) { //string literal
             result = getString();
-        } else //default char checks
-        {
+        } else{ //default char checks
             result = getOtherToken();
         }
 
