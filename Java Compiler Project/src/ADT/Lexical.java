@@ -378,10 +378,10 @@ public class Lexical
             if(result.lexeme.length() > MAX_IDENT_LEN){
                 consoleShowError("Identifier length is " + result.lexeme.length() + ", it will be truncated to 20");
                 result.lexeme = result.lexeme.substring(0, MAX_IDENT_LEN);
-                saveSymbols.AddSymbol(result.lexeme, 'V', 0);
+                saveSymbols.AddSymbol(result.lexeme, 'V', "0");
             }
             else{
-                saveSymbols.AddSymbol(result.lexeme, 'V', 0);
+                saveSymbols.AddSymbol(result.lexeme, 'V', "0");
             }
         }
 
