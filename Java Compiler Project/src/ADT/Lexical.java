@@ -364,7 +364,7 @@ public class Lexical
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
         //loop until no more characters in the input
-        while (isLetter(currCh) || (isDigit(currCh))) {
+        while (isLetter(currCh) || (isDigit(currCh)) || currCh == '_') {
             result.lexeme = result.lexeme + currCh; //extend lexeme
             currCh = GetNextChar();
         }
@@ -493,16 +493,32 @@ public class Lexical
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
-        while(!isWhitespace(currCh) && !isLetter(currCh) && !isDigit(currCh)){
-            if(isPrefix(currCh)){
-                result.lexeme = result.lexeme + currCh; //extend lexeme
-                if(PeekNextChar() == '=' || PeekNextChar() == '>'){ //if the next character is a suffix
-                    currCh = GetNextChar(); //get the suffix
+
+        int length = 0;
+
+        if(isPrefix(result.lexeme.charAt(0))){
+            length = 2;
+        }else{
+            length = 1;
+        }
+
+        while(!isWhitespace(currCh) && !isLetter(currCh) && !isDigit(currCh) && result.lexeme.length() < length){
+            if(isPrefix(result.lexeme.charAt(0))){
+                //result.lexeme = result.lexeme + currCh; //extend lexeme
+                if(currCh == '=' || currCh == '>'){ //if the next character is a suffix
                     result.lexeme = result.lexeme + currCh; //extend lexeme with suffix
+                    currCh = GetNextChar(); //get the suffix
+                }
+                else{   //if the first is a prefix, but the second isnt a suffix, then lookup the code and return early. 
+                    result.code = reserveWords.LookupName(result.lexeme);
+                    if(result.code == NOT_FOUND){
+                        result.code = codeFor("UNDEF");
+                    }
+                    return result;
                 }
             }
-            else{    
-                result.lexeme = result.lexeme + currCh; //extend lexeme    
+            else{
+                result.lexeme = result.lexeme + currCh;
                 currCh = GetNextChar();
             }
         }
