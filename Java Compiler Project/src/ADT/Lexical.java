@@ -135,7 +135,6 @@ public class Lexical
     */
     private void initMnemonics(ReserveTable mnemonics) 
     {
-        // Student must create their own 5-char mnemonics
         mnemonics.Add("_GOTO", 0);
         mnemonics.Add("INTGR", 1);
         mnemonics.Add("___TO", 2);
@@ -358,6 +357,14 @@ public class Lexical
     //global char
     char currCh;
 
+    /*
+     * This method gets the next identifier token in the input. 
+     * It adds the first char to the lexeme, gets the next one, and then continues to loop
+     * until the nexr char is no longer a letter, digit, or an _.
+     * The code is then found once the input is read. It then checks if it is a reserved word. if not,
+     * the method checks if the token is longer than 20, in which case it 
+     * truncates it and adds it too the symbol table.
+     */
     private token getIdentifier() 
     {
         token result = new token();
@@ -388,6 +395,15 @@ public class Lexical
         return result;
     }
 
+    /*
+     * This method gets the next number token in the input. 
+     * It adds the first char to the lexeme, gets the next one, and then continues to loop
+     * until the nexr char is no longer a digit. If the loop was exited because of a '.',
+     * If so, it adds the '.', then loops for more digits. If it exits because of an 'E',
+     * add the 'E' and then loop for more digits. Then, we know the number is a float.
+     * Then, truncate it if its too long, compute the exponent if theres an 'E', and add it to symbol.
+     * If it was an integer, do the same. 
+     */
     private token getNumber() 
     {
         token result = new token();
@@ -466,6 +482,12 @@ public class Lexical
         return result;
     }
 
+    /*
+     * This method geets the next string token in the input. Add the first token,
+     * then get the next one. Loop until the string end '"' character is found.
+     * If a '\n' is found before '"', produce and error and return an undefined token.
+     * Lastly, find the code and add it to the symbol.
+     */
     private token getString() 
     {
         token result = new token();
@@ -488,23 +510,33 @@ public class Lexical
         return result;
     }
 
+    /*
+     * method to get any other token in the input. Get the first token, then the next.
+     * Check if the lexeme contains a prefix character. If so, set the maximum length of
+     * the token to 2. If not, set it to 1.
+     * Then, loop until one of the other types of token characters is found or the lexeme
+     * reaches max length. during the loop, check if the current is a prefix. If so, check 
+     * if the next one is a suffix. If so, add it to the lexeme. If not, see if its a reserve
+     * character. If not, return an undefined character.
+     * If the character is not a prefix, just add it and exit the loop. Once the loop exits,
+     * check if its a reserve char. If not, return an undefined token.
+     */
     private token getOtherToken() 
     {
         token result = new token();
         result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
 
-        int length = 0;
+        int maxLength = 0; //variable for the maximum length of a token
 
         if(isPrefix(result.lexeme.charAt(0))){
-            length = 2;
+            maxLength = 2;
         }else{
-            length = 1;
+            maxLength = 1;
         }
 
-        while(!isWhitespace(currCh) && !isLetter(currCh) && !isDigit(currCh) && result.lexeme.length() < length){
+        while(!isWhitespace(currCh) && !isLetter(currCh) && !isDigit(currCh) && result.lexeme.length() < maxLength){
             if(isPrefix(result.lexeme.charAt(0))){
-                //result.lexeme = result.lexeme + currCh; //extend lexeme
                 if(currCh == '=' || currCh == '>'){ //if the next character is a suffix
                     result.lexeme = result.lexeme + currCh; //extend lexeme with suffix
                     currCh = GetNextChar(); //get the suffix
@@ -558,6 +590,10 @@ public class Lexical
         return result;
     }
 
+    /*
+     * method to get the next token in the input. Depending on the first character, call the other
+     * created helper functions. 
+     */
     public token GetNextToken() {
         token result = new token();
 
