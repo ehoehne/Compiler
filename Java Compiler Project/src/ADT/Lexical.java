@@ -3,7 +3,8 @@ import java.io.*;
 
 public class Lexical 
 {
-
+    //Eli Hoehne CS 4100 Spring 2023
+    
     private File file;                        //File to be read for input
     private FileReader filereader;            //Reader, Java reqd
     private BufferedReader bufferedreader;    //Buffered, Java reqd
@@ -483,15 +484,15 @@ public class Lexical
     }
 
     /*
-     * This method geets the next string token in the input. Add the first token,
+     * This method gets the next string token in the input. Add the first token,
      * then get the next one. Loop until the string end '"' character is found.
      * If a '\n' is found before '"', produce and error and return an undefined token.
+     * This method doesnt add the "" to the string 
      * Lastly, find the code and add it to the symbol.
      */
     private token getString() 
     {
         token result = new token();
-        result.lexeme = "" + currCh; //have the first char
         currCh = GetNextChar();
 
         while(currCh != '"'){
@@ -505,6 +506,8 @@ public class Lexical
                 currCh = GetNextChar();
             }
         }
+
+        currCh = GetNextChar();
         result.code = codeFor("STRNG");
         saveSymbols.AddSymbol(result.lexeme, 'C', result.lexeme);
         return result;
