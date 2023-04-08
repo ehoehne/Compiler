@@ -9,6 +9,8 @@ package ADT;
 
 public class Syntactic 
 {
+    //Eli Hoehne, 4886, CS4100, SPRING 2023
+
     private String filein;              //The full file path to input file
     private SymbolTable symbolList;     //Symbol table storing ident/const
     private Lexical lex;                //Lexical analyzer 
@@ -145,18 +147,100 @@ public class Syntactic
     // SimpleExpression MUST BE 
     //  COMPLETED TO IMPLEMENT CFG for <simple expression>
     private int SimpleExpression() {
-        int recur = 0;
+        int recur = Term();
         if (anyErrors) {
             return -1;
         }
 
         trace("SimpleExpression", true);
-        if (token.code == lex.codeFor("IDENT")) {   //was IDNT
+        int sign = lex.codeFor("__ADD"); //If not present, assume it is positive. 
+        if(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
+            sign = token.code;  
             token = lex.GetNextToken();
         }
+
+        int term = Term();
+        if(sign == lex.codeFor("__ADD")){
+            recur += term;
+        }
+        else{
+            recur -= term;
+        }
+
+        while(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
+            int addop = token.code;
+            token = lex.GetNextToken();
+            term = Term();
+            if(addop == lex.codeFor("__ADD")){
+                recur += term;
+            }
+            else{
+                recur -= term;
+            }
+        }
+        
         trace("SimpleExpression", false);
         return recur;
     }
+
+    private int Term(){
+        int recur = Factor();   //Return value used later
+        if (anyErrors) {        // Error check for fast exit, error status -1
+            return -1;
+        }
+
+        trace("Term", true);
+		
+        while(token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")){
+            int mulop = token.code;
+            token = lex.GetNextToken();
+            int factor = Factor();
+            if(mulop == lex.codeFor("_MULT")){
+                recur *= factor;
+            }
+            else{
+                recur /= factor;
+            }
+        }
+        
+		trace("Term", false);
+        return recur;
+    }  
+
+    private int Factor(){
+        int recur = 0;   //Return value used later
+        if (anyErrors) { //Error check for fast exit, error status -1
+            return -1;
+        }
+
+        trace("Factor", true);
+		if(token.code == lex.codeFor("IDENT")){
+            //<variable>
+        }
+        else if(token.code == lex.codeFor("INTGR") || token.code == lex.codeFor("FLOAT")){
+            //<unsigned constant>
+            recur = Integer.parseInt(token.lexeme);
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("LPREN")){
+            // $LPAR <simple expression> $RPAR
+            token = lex.GetNextToken();
+            recur = SimpleExpression();
+            if(token.code == lex.codeFor("RPREN")){
+                token = lex.GetNextToken();
+            }
+            else{
+                error("Closing Parenthesis", token.lexeme);
+            }
+        }
+        else{
+            error("Identifier, Integer, Float", token.lexeme);
+        }
+
+		trace("Factor", false);
+        return recur;
+
+    } 
 
     // Eventually this will handle all possible statement starts in 
     //    a nested if/else structure. Only ASSIGNMENT is implemented now.
@@ -168,10 +252,11 @@ public class Syntactic
 
         trace("Statement", true);
 
-        if (token.code == lex.codeFor("IDENT")) {  //must be an ASSIGNMENT, was IDNT
+        if (token.code == lex.codeFor("IDENT")) {  //must be an ASSIGNMENT
             recur = handleAssignment();
-        } else {
-            if (token.code == lex.codeFor("___IF")) {  //must be an IF, was _IF_
+        } 
+        else {
+            if (token.code == lex.codeFor("___IF")) {  //must be an IF
                 // this would handle the rest of the IF statment IN PART B
             } else 
 		    // if/elses should look for the other possible statement starts...  
@@ -194,9 +279,9 @@ public class Syntactic
         }
 
         trace("Variable", true);
-        if ((token.code == lex.codeFor("IDENT"))) {     //was IDNT
+        if ((token.code == lex.codeFor("IDENT"))) { 
             // bookkeeping and move on
-        token = lex.GetNextToken();
+            token = lex.GetNextToken();
         }
         else
             error("Variable", token.lexeme);
@@ -205,8 +290,7 @@ public class Syntactic
         return recur;
 
     }  
-        
-   
+    
     /* UTILITY FUNCTIONS USED THROUGHOUT THIS CLASS */
     // error provides a simple way to print an error statement to standard output
     // and avoid reduncancy
