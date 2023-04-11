@@ -1,0 +1,16 @@
+
+unit BadProg2;
+
+(* This Part A test file should has one syntax error AFTER
+    the Lexical truncation of the long number... it should continue
+	to find the ** on line 14! *)
+
+begin
+
+sum:=(27.1234567890123456 *first); (* A long number; syntax flags it and keeps going. *)
+a:= b;                                  
+(* There is a double ** error below *)
+quad1 := -b +(b**b) -  2;
+b := a
+end.
+

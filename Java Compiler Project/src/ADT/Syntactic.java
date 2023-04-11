@@ -1,12 +1,5 @@
 package ADT;
 
-// Add 2 lines which prints each token found by GetNextToken:
-//             if (printToken) {
-//                 System.out.println("\t" + result.mnemonic + " | \t" + String.format("%04d", result.code) + " | \t" + result.lexeme);
-//             }
-
-//  */
-
 public class Syntactic 
 {
     //Eli Hoehne, 4886, CS4100, SPRING 2023
@@ -140,12 +133,15 @@ public class Syntactic
         return recur;
     }
 
-    // NT This is dummied in to only work for an identifier. 
-    //  It will work with the SyntaxAMiniTest file having ASSIGNMENT statements
-    //     containing only IDENTIFIERS.  TERM and FACTOR and numbers will be
-    //     needed to complete Part A.
-    // SimpleExpression MUST BE 
-    //  COMPLETED TO IMPLEMENT CFG for <simple expression>
+    /*
+     * This method is called to handle a simple expression after an assignment token is found by
+     * handleAssignment. It starts by checking if a sign is given, if no sign is given, it defaults
+     * to positive. Then, the non-terminal Term is called. After the term is returned, it adjusts recur
+     * based on the sign. Next, it loops until it no longer finds an addop and a Term. It then
+     * adjusts recur again, and gets the next token. 
+     * 
+     * CFG: <simple expression> -> [<sign>] <term> {<addop> <term>}*
+     */
     private int SimpleExpression() {
         int recur = 0;
         if (anyErrors) {
@@ -153,13 +149,16 @@ public class Syntactic
         }
 
         trace("SimpleExpression", true);
+        
+        //[<sign>]
         int sign = lex.codeFor("__ADD"); //If not present, assume it is positive. 
         if(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
             sign = token.code;  
             token = lex.GetNextToken();
         }
 
-        int term = Term();
+        int term = Term();  //<term>
+
         if(sign == lex.codeFor("__ADD")){
             recur += term;
         }
@@ -167,6 +166,7 @@ public class Syntactic
             recur -= term;
         }
 
+        //{<addop> <term>}*
         while(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
             int addop = token.code;
             token = lex.GetNextToken();
@@ -183,16 +183,26 @@ public class Syntactic
         return recur;
     }
 
+    /*
+     * This method is called inside of SimpleExpression and handles the non-terminal "Term"
+     * It first calls Factor, and then loops until it no longer finds a mulop and a Factor.
+     * It then adjusts recur using the mulop, based on the returned Factor. It also makes 
+     * makes sure that it doesnt divide by 0.
+     * 
+     * CFG: <term> -> <factor> {<mulop> <factor>}*
+     */
     private int Term(){
-        int recur = 0;          //Return value used later
-        if (anyErrors) {        // Error check for fast exit, error status -1
+        int recur = 0;          
+        if (anyErrors) {        
             return -1;
         }
 
         trace("Term", true);
 		
+        //<factor>
         int factor = Factor();
 
+        //{<mulop> <factor>}*
         while(token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")){
             int mulop = token.code;
             token = lex.GetNextToken();
@@ -200,7 +210,7 @@ public class Syntactic
             if(mulop == lex.codeFor("_MULT")){
                 recur *= factor;
             }
-            else{
+            else if(mulop == lex.codeFor("DIVID") && factor != 0){
                 recur /= factor;
             }
         }
@@ -209,9 +219,20 @@ public class Syntactic
         return recur;
     }  
 
+    /*
+     * This method handles the non-terminal "Factor". It is called inside the Term method.
+     * It is responsible for checking what the given token is, and calling additional non-terminals
+     * based on that analysis. If it finds a number, it calls non-terminal UnsignedConstant. If it 
+     * finds an identifier, it calls Variable. If it finds '(', it calls SimpleExpression to handle
+     * the expression inside of the "()". After the expression is handled, it will check for a ')'
+     * and throw an error if it is not found. If it finds none of these in the original check, it will
+     * also throw an error. 
+     * 
+     * CFG: <factor> -> <unsigned constant> | <variable> | $LPAR <simple expression> $RPAR
+     */
     private int Factor(){
-        int recur = 0;   //Return value used later
-        if (anyErrors) { //Error check for fast exit, error status -1
+        int recur = 0;   
+        if (anyErrors) { 
             return -1;
         }
 
@@ -245,6 +266,12 @@ public class Syntactic
 
     } 
 
+    /*
+     * This method is called inside of Factor and handles the non-terminal "UnsignedConstant."
+     * The only thing that this non-terminal does is call UnsignedNumber, since they are the same thing.
+     * 
+     * CFG: <unsigned constant> -> <unsigned number>
+     */
     private int UnsignedConstant(){
         int recur = 0;   //Return value used later
         if (anyErrors) { // Error check for fast exit, error status -1
@@ -253,6 +280,7 @@ public class Syntactic
 
         trace("UnsignedConstant", true);
 		
+        //<unsigned number>
         recur = UnsignedNumber();
         
 		trace("UnsignedConstant", false);
@@ -261,9 +289,17 @@ public class Syntactic
 
     }  
 
+    /*
+     * This method handles the non-terminal "UnsignedNumber" and is called inside "UnsignedConstant"
+     * It checks if the token is an Integer or a Float. If its an integer, it parses it, adds it to recur,
+     * and gets the next token. If its a Float, it parses it as a double. For now, nothing is done with this
+     * result because the return type is an integer, and the return value is ignored for now. 
+     * 
+     * CFG: <unsigned number> -> $FLOAT | $INTEGER
+     */
     private int UnsignedNumber(){
-        int recur = 0;   //Return value used later
-        if (anyErrors) { // Error check for fast exit, error status -1
+        int recur = 0;   
+        if (anyErrors) { 
             return -1;
         }
 

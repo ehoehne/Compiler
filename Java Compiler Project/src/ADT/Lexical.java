@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Lexical 
 {
-    //Eli Hoehne CS 4100 Spring 2023
+    //Eli Hoehne, 4886, CS 4100 Spring 2023
     
     private File file;                        //File to be read for input
     private FileReader filereader;            //Reader, Java reqd
