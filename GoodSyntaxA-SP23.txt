@@ -1,0 +1,15 @@
+
+UNIT goodtree;
+
+(* This Part A test file should have NO errors! *)
+
+BEGIN
+{ The only statements for Part A are ASSIGNMENTS with EXPRESSIONS }
+
+total:=3.14*radius*radius;
+
+a :=(a+c)*(b-d)       ;
+
+d1 := -b - ((2+4) + 2*34) * c / 2.5
+
+end.

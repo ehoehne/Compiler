@@ -147,7 +147,7 @@ public class Syntactic
     // SimpleExpression MUST BE 
     //  COMPLETED TO IMPLEMENT CFG for <simple expression>
     private int SimpleExpression() {
-        int recur = Term();
+        int recur = 0;
         if (anyErrors) {
             return -1;
         }
@@ -184,17 +184,19 @@ public class Syntactic
     }
 
     private int Term(){
-        int recur = Factor();   //Return value used later
+        int recur = 0;          //Return value used later
         if (anyErrors) {        // Error check for fast exit, error status -1
             return -1;
         }
 
         trace("Term", true);
 		
+        int factor = Factor();
+
         while(token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")){
             int mulop = token.code;
             token = lex.GetNextToken();
-            int factor = Factor();
+            factor = Factor();
             if(mulop == lex.codeFor("_MULT")){
                 recur *= factor;
             }
@@ -214,13 +216,14 @@ public class Syntactic
         }
 
         trace("Factor", true);
+
 		if(token.code == lex.codeFor("IDENT")){
             //<variable>
+            recur = Variable();
         }
         else if(token.code == lex.codeFor("INTGR") || token.code == lex.codeFor("FLOAT")){
             //<unsigned constant>
-            recur = Integer.parseInt(token.lexeme);
-            token = lex.GetNextToken();
+            recur = UnsignedConstant();
         }
         else if(token.code == lex.codeFor("LPREN")){
             // $LPAR <simple expression> $RPAR
@@ -241,6 +244,45 @@ public class Syntactic
         return recur;
 
     } 
+
+    private int UnsignedConstant(){
+        int recur = 0;   //Return value used later
+        if (anyErrors) { // Error check for fast exit, error status -1
+            return -1;
+        }
+
+        trace("UnsignedConstant", true);
+		
+        recur = UnsignedNumber();
+        
+		trace("UnsignedConstant", false);
+
+        return recur;
+
+    }  
+
+    private int UnsignedNumber(){
+        int recur = 0;   //Return value used later
+        if (anyErrors) { // Error check for fast exit, error status -1
+            return -1;
+        }
+
+        trace("UnsignedNumber", true);
+		
+        if(token.code == lex.codeFor("INTGR")){
+            recur = Integer.parseInt(token.lexeme);
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("FLOAT")){
+            Double.parseDouble(token.lexeme);
+            token = lex.GetNextToken();
+        }
+        
+		trace("UnsignedNumber", false);
+        // Final result of assigning to "recur" in the body is returned
+        return recur;
+
+    }  
 
     // Eventually this will handle all possible statement starts in 
     //    a nested if/else structure. Only ASSIGNMENT is implemented now.
