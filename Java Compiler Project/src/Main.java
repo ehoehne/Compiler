@@ -7,7 +7,7 @@ public class Main
         //Eli Hoehne, 4886, CS4100, SPRING 2023
         System.out.println("Eli Hoehne, 4886, CS4100, SPRING 2023");
 
-        String filePath = "BadSyntax-2-A-SP23.txt";
+        String filePath = args[0];
         boolean traceon = true;
         System.out.println("INPUT FILE TO PROCESS IS: "+filePath);
     

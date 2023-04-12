@@ -1,0 +1,143 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+INPUT FILE TO PROCESS IS: BadSyntax-1-A-SP23.txt
+0001 
+0002 unit BadProg1;
+        _UNIT |         0015 |  unit
+--> Entering Program
+        IDENT |         0050 |  BadProg1
+        SCOLN |         0036 |  ;
+0003 
+0004 (* This Part A test file should have one syntax error! *)
+0005 
+0006 begin
+        BEGIN |         0011 |  begin
+ --> Entering Block
+0007 { The only statements for Part A are ASSIGNMENTS with EXPRESSIONS }
+0008 
+0009 sum:=(27*first)+ 3.14*radius*radius;
+        IDENT |         0050 |  sum
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        LPREN |         0034 |  (
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+        INTGR |         0001 |  27
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering UnsignedConstant
+           --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+           <-- Exiting UnsignedNumber
+          <-- Exiting UnsignedConstant
+         <-- Exiting Factor
+         --> Entering Mulop
+        IDENT |         0050 |  first
+         <-- Exiting Mulop
+         --> Entering Factor
+          --> Entering Variable
+        RPREN |         0035 |  )
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        __ADD |         0032 |  +
+      <-- Exiting Factor
+     <-- Exiting Term
+     --> Entering Addop
+        FLOAT |         0023 |  3.14
+     <-- Exiting Addop
+     --> Entering Term
+      --> Entering Factor
+       --> Entering UnsignedConstant
+        --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+        <-- Exiting UnsignedNumber
+       <-- Exiting UnsignedConstant
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  radius
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        _MULT |         0031 |  *
+       <-- Exiting Variable
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  radius
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        SCOLN |         0036 |  ;
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+0010 
+0011 (* missing left paren below... where is it discovered? *)
+0012 a :=(a+c)*b-d)                ;
+        IDENT |         0050 |  a
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        LPREN |         0034 |  (
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+        IDENT |         0050 |  a
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        __ADD |         0032 |  +
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+        --> Entering Addop
+        IDENT |         0050 |  c
+        <-- Exiting Addop
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        RPREN |         0035 |  )
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        _MULT |         0031 |  *
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  b
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        __SUB |         0033 |  -
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+     --> Entering Addop
+        IDENT |         0050 |  d
+     <-- Exiting Addop
+     --> Entering Term
+      --> Entering Factor
+       --> Entering Variable
+        RPREN |         0035 |  )
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+ERROR: Expected END but found )
+ <-- Exiting Block
+ERROR: Expected . but found )
+<-- Exiting Program
+Done.

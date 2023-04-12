@@ -12,7 +12,8 @@ Contains all the files for the Compiler developed in CS 4100
         - `Symbol`\
         - `SymbolTable`\
         - `Lexical`\
+        - `Syntactic`\
 `out` folder should contain all of the previous output `.txt` files created by the compiler\
 
 `Main` contains (for now) sample programs to test the compiler\
-    - Current `Main` is for the Interpreter
+    - Current `Main` is for Syntactic A

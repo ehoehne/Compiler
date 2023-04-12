@@ -1,0 +1,227 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+INPUT FILE TO PROCESS IS: GoodSyntaxA-SP23.txt
+0001 
+0002 UNIT goodtree;
+        _UNIT |         0015 |  UNIT
+--> Entering Program
+        IDENT |         0050 |  goodtree
+        SCOLN |         0036 |  ;
+0003 
+0004 (* This Part A test file should have NO errors! *)
+0005 
+0006 BEGIN
+        BEGIN |         0011 |  BEGIN
+ --> Entering Block
+0007 { The only statements for Part A are ASSIGNMENTS with EXPRESSIONS }
+0008 
+0009 total:=3.14*radius*radius;
+        IDENT |         0050 |  total
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        FLOAT |         0023 |  3.14
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+       --> Entering UnsignedConstant
+        --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+        <-- Exiting UnsignedNumber
+       <-- Exiting UnsignedConstant
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  radius
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        _MULT |         0031 |  *
+       <-- Exiting Variable
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  radius
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        SCOLN |         0036 |  ;
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+0010 
+0011 a :=(a+c)*(b-d)       ;
+        IDENT |         0050 |  a
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        LPREN |         0034 |  (
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+        IDENT |         0050 |  a
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        __ADD |         0032 |  +
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+        --> Entering Addop
+        IDENT |         0050 |  c
+        <-- Exiting Addop
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        RPREN |         0035 |  )
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        _MULT |         0031 |  *
+      <-- Exiting Factor
+      --> Entering Mulop
+        LPREN |         0034 |  (
+      <-- Exiting Mulop
+      --> Entering Factor
+        IDENT |         0050 |  b
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        __SUB |         0033 |  -
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+        --> Entering Addop
+        IDENT |         0050 |  d
+        <-- Exiting Addop
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        RPREN |         0035 |  )
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        SCOLN |         0036 |  ;
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+0012 
+0013 d1 := -b - ((2+4) + 2*34) * c / 2.5
+        IDENT |         0050 |  d1
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        __SUB |         0033 |  -
+    --> Entering SimpleExpression
+     --> Entering Sign
+        IDENT |         0050 |  b
+     <-- Exiting Sign
+     --> Entering Term
+      --> Entering Factor
+       --> Entering Variable
+        __SUB |         0033 |  -
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+     --> Entering Addop
+        LPREN |         0034 |  (
+     <-- Exiting Addop
+     --> Entering Term
+      --> Entering Factor
+        LPREN |         0034 |  (
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+        INTGR |         0001 |  2
+          --> Entering SimpleExpression
+           --> Entering Term
+            --> Entering Factor
+             --> Entering UnsignedConstant
+              --> Entering UnsignedNumber
+        __ADD |         0032 |  +
+              <-- Exiting UnsignedNumber
+             <-- Exiting UnsignedConstant
+            <-- Exiting Factor
+           <-- Exiting Term
+           --> Entering Addop
+        INTGR |         0001 |  4
+           <-- Exiting Addop
+           --> Entering Term
+            --> Entering Factor
+             --> Entering UnsignedConstant
+              --> Entering UnsignedNumber
+        RPREN |         0035 |  )
+              <-- Exiting UnsignedNumber
+             <-- Exiting UnsignedConstant
+            <-- Exiting Factor
+           <-- Exiting Term
+          <-- Exiting SimpleExpression
+        __ADD |         0032 |  +
+         <-- Exiting Factor
+        <-- Exiting Term
+        --> Entering Addop
+        INTGR |         0001 |  2
+        <-- Exiting Addop
+        --> Entering Term
+         --> Entering Factor
+          --> Entering UnsignedConstant
+           --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+           <-- Exiting UnsignedNumber
+          <-- Exiting UnsignedConstant
+         <-- Exiting Factor
+         --> Entering Mulop
+        INTGR |         0001 |  34
+         <-- Exiting Mulop
+         --> Entering Factor
+          --> Entering UnsignedConstant
+           --> Entering UnsignedNumber
+        RPREN |         0035 |  )
+           <-- Exiting UnsignedNumber
+          <-- Exiting UnsignedConstant
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        _MULT |         0031 |  *
+      <-- Exiting Factor
+      --> Entering Mulop
+        IDENT |         0050 |  c
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering Variable
+        DIVID |         0030 |  /
+       <-- Exiting Variable
+      <-- Exiting Factor
+      --> Entering Mulop
+        FLOAT |         0023 |  2.5
+      <-- Exiting Mulop
+      --> Entering Factor
+       --> Entering UnsignedConstant
+        --> Entering UnsignedNumber
+0014 
+0015 end.
+        __END |         0012 |  end
+        <-- Exiting UnsignedNumber
+       <-- Exiting UnsignedConstant
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+        __DOT |         0048 |  .
+ <-- Exiting Block
+Success.
+<-- Exiting Program
+Done.

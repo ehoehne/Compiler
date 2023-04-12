@@ -1,0 +1,126 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+INPUT FILE TO PROCESS IS: BadSyntax-2-A-SP23.txt
+0001 
+0002 unit BadProg2;
+        _UNIT |         0015 |  unit
+--> Entering Program
+        IDENT |         0050 |  BadProg2
+        SCOLN |         0036 |  ;
+0003 
+0004 (* This Part A test file should has one syntax error AFTER
+0005     the Lexical truncation of the long number... it should continue
+0006    to find the ** on line 14! *)
+0007 
+0008 begin
+        BEGIN |         0011 |  begin
+ --> Entering Block
+0009 
+0010 sum:=(27.1234567890123456 *first); (* A long number; syntax flags it and keeps going. *)
+        IDENT |         0050 |  sum
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        LPREN |         0034 |  (
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+**** ERROR FOUND: Identifier length is 19, it will be truncated to 12
+        FLOAT |         0023 |  27.123456789
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering UnsignedConstant
+           --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+           <-- Exiting UnsignedNumber
+          <-- Exiting UnsignedConstant
+         <-- Exiting Factor
+         --> Entering Mulop
+        IDENT |         0050 |  first
+         <-- Exiting Mulop
+         --> Entering Factor
+          --> Entering Variable
+        RPREN |         0035 |  )
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+        SCOLN |         0036 |  ;
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+0011 a:= b;                                  
+        IDENT |         0050 |  a
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        IDENT |         0050 |  b
+    --> Entering SimpleExpression
+     --> Entering Term
+      --> Entering Factor
+       --> Entering Variable
+        SCOLN |         0036 |  ;
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+0012 (* There is a double ** error below *)
+0013 quad1 := -b +(b**b) -  2;
+        IDENT |         0050 |  quad1
+  --> Entering Statement
+   --> Entering handleAssignment
+    --> Entering Variable
+        ASIGN |         0037 |  :=
+    <-- Exiting Variable
+        __SUB |         0033 |  -
+    --> Entering SimpleExpression
+     --> Entering Sign
+        IDENT |         0050 |  b
+     <-- Exiting Sign
+     --> Entering Term
+      --> Entering Factor
+       --> Entering Variable
+        __ADD |         0032 |  +
+       <-- Exiting Variable
+      <-- Exiting Factor
+     <-- Exiting Term
+     --> Entering Addop
+        LPREN |         0034 |  (
+     <-- Exiting Addop
+     --> Entering Term
+      --> Entering Factor
+        IDENT |         0050 |  b
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        _MULT |         0031 |  *
+          <-- Exiting Variable
+         <-- Exiting Factor
+         --> Entering Mulop
+        _MULT |         0031 |  *
+         <-- Exiting Mulop
+         --> Entering Factor
+ERROR: Expected Number, Variable, or '(' but found *
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+ERROR: Expected ')' but found *
+      <-- Exiting Factor
+     <-- Exiting Term
+    <-- Exiting SimpleExpression
+   <-- Exiting handleAssignment
+  <-- Exiting Statement
+ERROR: Expected END but found *
+ <-- Exiting Block
+ERROR: Expected . but found *
+<-- Exiting Program
+Done.

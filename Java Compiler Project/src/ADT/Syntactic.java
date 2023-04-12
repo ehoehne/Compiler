@@ -137,8 +137,8 @@ public class Syntactic
      * This method is called to handle a simple expression after an assignment token is found by
      * handleAssignment. It starts by checking if a sign is given, if no sign is given, it defaults
      * to positive. Then, the non-terminal Term is called. After the term is returned, it adjusts recur
-     * based on the sign. Next, it loops until it no longer finds an addop and a Term. It then
-     * adjusts recur again, and gets the next token. 
+     * based on the sign. Next, it loops until it no longer finds an Addop and a Term and no errors are found.
+     * It then adjusts recur again.
      * 
      * CFG: <simple expression> -> [<sign>] <term> {<addop> <term>}*
      */
@@ -153,8 +153,7 @@ public class Syntactic
         //[<sign>]
         int sign = lex.codeFor("__ADD"); //If not present, assume it is positive. 
         if(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
-            sign = token.code;  
-            token = lex.GetNextToken();
+            sign = Sign();
         }
 
         int term = Term();  //<term>
@@ -167,9 +166,8 @@ public class Syntactic
         }
 
         //{<addop> <term>}*
-        while(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
-            int addop = token.code;
-            token = lex.GetNextToken();
+        while((token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")) && !anyErrors){
+            int addop = Addop();
             term = Term();
             if(addop == lex.codeFor("__ADD")){
                 recur += term;
@@ -185,9 +183,9 @@ public class Syntactic
 
     /*
      * This method is called inside of SimpleExpression and handles the non-terminal "Term"
-     * It first calls Factor, and then loops until it no longer finds a mulop and a Factor.
-     * It then adjusts recur using the mulop, based on the returned Factor. It also makes 
-     * makes sure that it doesnt divide by 0.
+     * It first calls Factor, and then loops until it no longer finds a Mulop and a Factor
+     * and no errors are found. It then adjusts recur using the Mulop, based on the returned 
+     * Factor. It also makes makes sure that it doesnt divide by 0.
      * 
      * CFG: <term> -> <factor> {<mulop> <factor>}*
      */
@@ -203,9 +201,8 @@ public class Syntactic
         int factor = Factor();
 
         //{<mulop> <factor>}*
-        while(token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")){
-            int mulop = token.code;
-            token = lex.GetNextToken();
+        while((token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")) && !anyErrors){
+            int mulop = Mulop();
             factor = Factor();
             if(mulop == lex.codeFor("_MULT")){
                 recur *= factor;
@@ -254,17 +251,98 @@ public class Syntactic
                 token = lex.GetNextToken();
             }
             else{
-                error("Closing Parenthesis", token.lexeme);
+                error("')'", token.lexeme);
             }
         }
         else{
-            error("Identifier, Integer, Float", token.lexeme);
+            error("Number, Variable, or '('", token.lexeme);
         }
 
 		trace("Factor", false);
         return recur;
 
     } 
+    
+    /*
+     * Handles the Sign non-terminal. Will return the code based on the sign, and get the next token
+     * Called inside of SimpleExpression.
+     * 
+     * CFG: <sign> -> $PLUS | $MINUS
+     */
+    private int Sign(){
+        int recur = 0;   
+        if (anyErrors) {
+            return -1;
+        }
+
+        trace("Sign", true);
+
+        if(token.code == lex.codeFor("__ADD")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("__SUB")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+
+		trace("Sign", false);
+        return recur;
+    }  
+
+    /*
+     * Handles the Addop non-terminal. Will save the code based on the input, and get the next token.
+     * Called inside of SimpleExpression.
+     * 
+     * CFG: <addop> -> $PLUS | $MINUS
+     */
+    private int Addop(){
+        int recur = 0;   
+        if (anyErrors) {
+            return -1;
+        }
+
+        trace("Addop", true);
+
+        if(token.code == lex.codeFor("__ADD")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("__SUB")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+
+		trace("Addop", false);
+        return recur;
+    }  
+
+     /*
+     * Handles the Mulop non-terminal. Will save the code based on the input, and get the next token.
+     * Called inside of Term.
+     * 
+     * CFG: <mulop> -> $MULTIPLY | $DIVIDE
+     */
+    private int Mulop(){
+        int recur = 0;   
+        if (anyErrors) {
+            return -1;
+        }
+
+        trace("Mulop", true);
+
+        if(token.code == lex.codeFor("_MULT")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("DIVID")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+
+		trace("Mulop", false);
+        return recur;
+    }  
 
     /*
      * This method is called inside of Factor and handles the non-terminal "UnsignedConstant."
