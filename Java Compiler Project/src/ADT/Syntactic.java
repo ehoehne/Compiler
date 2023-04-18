@@ -89,8 +89,25 @@ public class Syntactic
             return -1;
         }
         trace("Block", true);
+        if(token.code == lex.codeFor("__VAR")){
+            recur = VariableDecSec();
+        }
+        
+        recur = BlockBody();
+        
+        trace("Block", false);
+        return recur;
+    }
 
-        if (token.code == lex.codeFor("BEGIN")) {    //was BGIN
+    private int BlockBody(){
+        int recur = 0; 
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("BlockBody", true);
+
+		if (token.code == lex.codeFor("BEGIN")) {    //was BGIN
             token = lex.GetNextToken();
             recur = Statement();
             while ((token.code == lex.codeFor("SCOLN")) && (!lex.EOF()) && (!anyErrors)) {  //was SEMI
@@ -104,12 +121,13 @@ public class Syntactic
             }
 
         } else {
-            error(lex.reserveFor("BEGIN"), token.lexeme);   //was BGIN
+            error(lex.reserveFor("BEGIN"), token.lexeme);   //update for var too
         }
-
-        trace("Block", false);
+        
+		trace("BlockBody", false);
         return recur;
-    }
+
+    }  
 
     //Not a NT, but used to shorten Statement code body for readability.   
     //<variable> $COLON-EQUALS <simple expression>
@@ -132,6 +150,90 @@ public class Syntactic
         trace("handleAssignment", false);
         return recur;
     }
+
+    private int VariableDecSec() {
+        int recur = 0;   
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("VariableDecSec", true);
+
+        recur = VariableDeclaration();
+
+		trace("VariableDecSec", false);
+        return recur;
+
+    }  
+
+    private int VariableDeclaration(){
+        int recur = 0;   
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("VariableDeclaration", true);
+		
+        do {
+            token = lex.GetNextToken();
+            if(token.code == lex.codeFor("IDENT")){
+                token = lex.GetNextToken();
+                while(token.code == lex.codeFor("COMMA")){
+                    token = lex.GetNextToken();
+                    if(token.code == lex.codeFor("IDENT")){
+                        token = lex.GetNextToken();
+                    }
+                }
+                if(token.code == lex.codeFor("COLON")){
+                    token = lex.GetNextToken();
+                    recur = SimpleType();
+                    if(token.code == lex.codeFor("SCOLN")){
+                        token = lex.GetNextToken();
+                    }
+                }
+                else{
+                    error("Colon", token.lexeme);
+                }
+            }
+            else{
+                error("Identifier", token.lexeme);
+            }
+
+        } while(token.code == lex.codeFor("__VAR"));
+        
+		trace("VariableDeclaration", false);
+        return recur;
+    }  
+
+    private int SimpleType(){
+        int recur = 0;
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("SimpleType", true);
+		
+        if(token.code == lex.codeFor("INTGR")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("FLOAT")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("STRNG")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else{
+            error("Integer, Float, or String", token.lexeme);
+        }
+
+		trace("SimpleType", false);
+
+        return recur;
+
+    }  
 
     /*
      * This method is called to handle a simple expression after an assignment token is found by
