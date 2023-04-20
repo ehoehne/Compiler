@@ -58,26 +58,26 @@ public class Syntactic
             return -1;
         }
         trace("Program", true);
-        if (token.code == lex.codeFor("_UNIT")) {   //was UNIT
+        if (token.code == lex.codeFor("_UNIT")) { 
             token = lex.GetNextToken();
             recur = ProgIdentifier();
-            if (token.code == lex.codeFor("SCOLN")) {   //was SEMI
+            if (token.code == lex.codeFor("SCOLN")) { 
                 token = lex.GetNextToken();
                 recur = Block();
-                if (token.code == lex.codeFor("__DOT")) {    //was PERD
+                if (token.code == lex.codeFor("__DOT")) { 
                     if (!anyErrors) {
                         System.out.println("Success.");
                     } else {
                         System.out.println("Compilation failed.");
                     }
                 } else {
-                    error(lex.reserveFor("__DOT"), token.lexeme); //was PERD
+                    error(lex.reserveFor("__DOT"), token.lexeme);
                 }
             } else {
-                error(lex.reserveFor("SCOLN"), token.lexeme);   //was SEMI
+                error(lex.reserveFor("SCOLN"), token.lexeme); 
             }
         } else {
-            error(lex.reserveFor("_UNIT"), token.lexeme);   //was UNIT
+            error(lex.reserveFor("_UNIT"), token.lexeme);
         }
         trace("Program", false);
         return recur;
@@ -103,6 +103,13 @@ public class Syntactic
         return recur;
     }
 
+
+    /*
+     * Updated in Syntax B. content of this used to be in the Block method, was split out ini order to match cfg given in in part B
+     * Also updated to handle resynching after an error is found. This will handle the given UNTIL by flushing out the rest of the
+     * statement after UNTIL, and then moving onto the next statement. Will also handle skipping and extra ;, because the logic here skips that
+     * check in the first place. 
+     */
     private int BlockBody(){
         int recur = 0; 
         if (anyErrors) { 
@@ -120,11 +127,34 @@ public class Syntactic
             }
             if (token.code == lex.codeFor("__END")) {   
                 token = lex.GetNextToken();
-            } else {
+            } 
+            //handles resynching when an error is found.
+            //will skip over any left over tokens after the error, and moke onto the next statement.
+            //will also skip over the extra ; found after the writeln, in BAD, as mentioned in class. 
+            else if(token.code != lex.codeFor("__END") && anyErrors){
+                token = lex.GetNextToken();
+                while(token.code != lex.codeFor("SCOLN")){
+                    token = lex.GetNextToken();
+                }
+                if(token.code == lex.codeFor("SCOLN")){
+                    token = lex.GetNextToken();
+                }
+                anyErrors = false;
+                recur = Statement();
+
+                if(token.code == lex.codeFor("SCOLN")){
+                    token = lex.GetNextToken();
+                }
+                if (token.code == lex.codeFor("__END")) {   
+                    token = lex.GetNextToken();
+                } 
+            }
+            else {
                 error(lex.reserveFor("__END"), token.lexeme);
             }
 
-        } else {
+        } 
+        else {
             error(lex.reserveFor("BEGIN"), token.lexeme);   //update for var too
         }
         
@@ -155,6 +185,10 @@ public class Syntactic
         return recur;
     }
 
+    /*
+     * Added in part B. All this method does is handle calling the nonterminal variable declaration.
+     * This is here in order to match the given CFG.
+     */
     private int VariableDecSec() {
         int recur = 0;   
         if (anyErrors) { 
@@ -170,6 +204,13 @@ public class Syntactic
 
     }  
 
+    /*
+     * Added in part B. This handles the variable declaration according to CFG. 
+     * Uses a do while loop to ensure it runs at least once. Will successfully handle multiple declarations
+     * on a single line, as well as more subsequent lines of delarations. 
+     * 
+     * CFG: <variable-declaration> -> {<identifier> {$COMMA <identifier>}* $COLON <simple type> $SEMICOLON}+
+     */
     private int VariableDeclaration(){
         int recur = 0;   
         if (anyErrors) { 
@@ -178,20 +219,20 @@ public class Syntactic
 
         trace("VariableDeclaration", true);
 		
-        do {
+        do {    //{ xxx }+ handles looping at least once
             token = lex.GetNextToken();
-            if(token.code == lex.codeFor("IDENT")){
+            if(token.code == lex.codeFor("IDENT")){ //<identifier>
                 token = lex.GetNextToken();
-                while(token.code == lex.codeFor("COMMA")){
+                while(token.code == lex.codeFor("COMMA")){  //{$COMMA <identifier>}*
                     token = lex.GetNextToken();
-                    if(token.code == lex.codeFor("IDENT")){
+                    if(token.code == lex.codeFor("IDENT")){ 
                         token = lex.GetNextToken();
                     }
                 }
-                if(token.code == lex.codeFor("COLON")){
+                if(token.code == lex.codeFor("COLON")){     //$COLON
                     token = lex.GetNextToken();
-                    recur = SimpleType();
-                    if(token.code == lex.codeFor("SCOLN")){
+                    recur = SimpleType();                   //<simple type>
+                    if(token.code == lex.codeFor("SCOLN")){ //$SEMICOLON
                         token = lex.GetNextToken();
                     }
                 }
@@ -209,6 +250,9 @@ public class Syntactic
         return recur;
     }  
 
+    /*
+     * Added in part B, handles type checking for the simple types integer, float, and string.
+     */
     private int SimpleType(){
         int recur = 0;
         if (anyErrors) { 
@@ -238,7 +282,13 @@ public class Syntactic
         return recur;
 
     }  
-
+    
+    /*
+     * Added in part B. Handles relational expressions. Calls relop to gather a relational operator, 
+     * sandwiched between two simple expressions
+     * 
+     * CFG: <relexpression> -> <simple expression> <relop> <simple expression>
+     */
     private int RelExpression(){
         int recur = 0;  
         if (anyErrors) { 
@@ -247,11 +297,11 @@ public class Syntactic
 
         trace("RelExpression", true);
 		
-        recur = SimpleExpression();
+        recur = SimpleExpression(); //<simple expression>
 
-        recur = Relop();
+        recur = Relop();    //<relop>
 
-        recur = SimpleExpression();
+        recur = SimpleExpression(); //<simple expression>
         
 		trace("RelExpression", false);
     
@@ -469,6 +519,13 @@ public class Syntactic
         return recur;
     }  
 
+
+    /*
+     * Added in part B, handles returning a relational operator, including:
+     * =, <, >, <>, <=, >=. 
+     * 
+     * CFG: <relop> -> $EQ | $LSS | $GTR | $NEQ | $LEQ | $GEQ
+     */
     private int Relop(){
         int recur = 0;  
         if (anyErrors) { 
@@ -506,6 +563,9 @@ public class Syntactic
         return recur;
     } 
     
+    /*
+     * Added in B. Handles type checking for a string constant.
+     */
     private int StringConstant(){
         int recur = 0;  
         if (anyErrors) { 
@@ -522,6 +582,7 @@ public class Syntactic
 		trace("StringConstant", false);
         return recur;
     } 
+
     /*
      * This method is called inside of Factor and handles the non-terminal "UnsignedConstant."
      * The only thing that this non-terminal does is call UnsignedNumber, since they are the same thing.
@@ -571,13 +632,17 @@ public class Syntactic
         }
         
 		trace("UnsignedNumber", false);
-        // Final result of assigning to "recur" in the body is returned
         return recur;
 
     }  
 
-    // Eventually this will handle all possible statement starts in 
-    //    a nested if/else structure. Only ASSIGNMENT is implemented now.
+    /*
+     * Added in B, handles most of the logic for statements. This method will check for an idenifier, just like before,
+     * but it will also now check for every other type of statment start, including:
+     * Begin, If, DoWhile, Repeat, For, Writeln, and Readln.
+     * 
+     * CFG is shown above main. 
+     */
     private int Statement() {
         int recur = 0;
         if (anyErrors) {
@@ -620,6 +685,12 @@ public class Syntactic
         return recur;
     }
 
+    /*
+     * Handles the If startment start. Starts by looking for a relexpression, then a subsequent then block, 
+     * then an optional else block.
+     * 
+     * CFG: $IF <relexpression> $THEN <statement> [$ELSE <statement>]
+     */
     private int handleIf(){
         int recur = 0;  
         if (anyErrors) { 
@@ -647,6 +718,11 @@ public class Syntactic
         return recur;
     } 
 
+    /*
+     * Handles do while statement start. First, a relexpression, and then a statement. 
+     * 
+     * CFG: $DOWHILE <relexpression> <statement>
+     */
     private int handleWhile(){
         int recur = 0;  
         if (anyErrors) { 
@@ -664,6 +740,12 @@ public class Syntactic
         return recur;
     } 
 
+    /*
+     * Handles repeat statement start. Starts with a statement, looks for UNTIl, and then if UNTIL is found, 
+     * looks for a relexpression.
+     * 
+     * CFG: $REPEAT <statement> $UNTIL <relexpression>
+     */
     private int handleRepeat(){
         int recur = 0;  
         if (anyErrors) { 
@@ -684,6 +766,12 @@ public class Syntactic
         return recur;
     } 
 
+    /*
+     * Handles For statement start. First looks for an identifier, then an assignment, then TO and DO keywords. 
+     * Calls simpleexpression and statement inside of those, respectively.
+     * 
+     * CFG: $FOR <variable> $ASSIGN <simple expression> $TO <simple expression> $DO <statement> 
+     */
     private int handleFor(){
         int recur = 0;  
         if (anyErrors) { 
@@ -712,6 +800,12 @@ public class Syntactic
         return recur;
     } 
 
+    /*
+     * Handles writeln statement start. This looks for (, then an ideentifier, then a ).
+     * This is modified according to the given annoucment saying to omit the capability for simpleexpressions.
+     * 
+     * modified CFG: WRITELN $LPAR (<identifier> |<stringconst>) $RPAR
+     */
     private int handleWriteln(){
         int recur = 0;  
         if (anyErrors) { 
@@ -735,10 +829,15 @@ public class Syntactic
         }
         
         
-		trace("handleeWriteln", false);
+		trace("handleWriteln", false);
         return recur;
     } 
 
+    /*
+     * Handles readln statement start. Looks for (, then an identifier, then ).
+     * 
+     * CFG: $READLN $LPAR <identifier> $RPAR
+     */
     private int handleReadln(){
         int recur = 0;  
         if (anyErrors) { 
@@ -758,6 +857,7 @@ public class Syntactic
 		trace("handleReadln", false);
         return recur;
     } 
+
     //Non-terminal VARIABLE just looks for an IDENTIFIER.  Later, a
     //  type-check can verify compatible math ops, or if casting is required.    
     private int Variable(){
@@ -820,23 +920,6 @@ public class Syntactic
             result = result + s;
         }
         return result;
-    }
-
-    /*  Template for all the non-terminal method bodies
-    // ALL OF THEM SHOULD LOOK LIKE THE FOLLOWING AT THE ENTRY/EXIT POINTS  
-    private int (){
-        int recur = 0;  
-        if (anyErrors) { 
-            return -1;
-        }
-
-        trace("", true);
-		
-    
-        
-		trace("", false);
-        return recur;
-    } 
-    */    
+    }  
 }
 

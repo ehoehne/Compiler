@@ -21,6 +21,10 @@ public class Main
                         <stringconst> ) $RPAR
                         $READLN $LPAR <identifier> $RPAR
                         ]+
+        <relexpression> -> <simple expression> <relop> <simple expression>
+        <relop> -> $EQ | $LSS | $GTR | $NEQ | $LEQ | $GEQ
+        <simple type> -> $INTEGER | $FLOAT | $STRING
+        <stringconst> -> $STRINGTYPE
     */
 
     public static void main(String[] args) throws Exception 
@@ -28,7 +32,7 @@ public class Main
         //Eli Hoehne, 4886, CS4100, SPRING 2023
         System.out.println("Eli Hoehne, 4886, CS4100, SPRING 2023");
 
-        String filePath = "SyntaxB-GOOD.txt";
+        String filePath = args[0];
         boolean traceon = true;
         System.out.println("INPUT FILE TO PROCESS IS: "+filePath);
     
