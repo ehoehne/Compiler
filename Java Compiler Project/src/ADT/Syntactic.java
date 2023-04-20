@@ -11,7 +11,7 @@ public class Syntactic
     private boolean traceon;            //Controls tracing mode 
     private int level = 0;              //Controls indent for trace mode
     private boolean anyErrors;          //Set TRUE if an error happens 
-
+    private boolean firstDecSec;
     private final int symbolSize = 250;
 
     public Syntactic(String filename, boolean traceOn) {
@@ -21,6 +21,7 @@ public class Syntactic
         lex = new Lexical(filein, symbolList, true);
         lex.setPrintToken(traceOn);
         anyErrors = false;
+        firstDecSec = true;
     }
 
     //The interface to the syntax analyzer, initiates parsing
@@ -89,8 +90,11 @@ public class Syntactic
             return -1;
         }
         trace("Block", true);
-        if(token.code == lex.codeFor("__VAR")){
+
+        
+        if(token.code == lex.codeFor("__VAR") && firstDecSec){
             recur = VariableDecSec();
+            firstDecSec = false;
         }
         
         recur = BlockBody();
@@ -107,17 +111,17 @@ public class Syntactic
 
         trace("BlockBody", true);
 
-		if (token.code == lex.codeFor("BEGIN")) {    //was BGIN
+		if (token.code == lex.codeFor("BEGIN")) {    
             token = lex.GetNextToken();
             recur = Statement();
-            while ((token.code == lex.codeFor("SCOLN")) && (!lex.EOF()) && (!anyErrors)) {  //was SEMI
+            while ((token.code == lex.codeFor("SCOLN")) && (!lex.EOF()) && (!anyErrors)) { 
                 token = lex.GetNextToken();
                 recur = Statement();
             }
-            if (token.code == lex.codeFor("__END")) {    //was END_
+            if (token.code == lex.codeFor("__END")) {   
                 token = lex.GetNextToken();
             } else {
-                error(lex.reserveFor("__END"), token.lexeme);   //was END_
+                error(lex.reserveFor("__END"), token.lexeme);
             }
 
         } else {
@@ -234,6 +238,25 @@ public class Syntactic
         return recur;
 
     }  
+
+    private int RelExpression(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("RelExpression", true);
+		
+        recur = SimpleExpression();
+
+        recur = Relop();
+
+        recur = SimpleExpression();
+        
+		trace("RelExpression", false);
+    
+        return recur;
+    } 
 
     /*
      * This method is called to handle a simple expression after an assignment token is found by
@@ -446,6 +469,59 @@ public class Syntactic
         return recur;
     }  
 
+    private int Relop(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("Relop", true);
+		
+        if(token.code == lex.codeFor("EQUAL")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("_LESS")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("_GRTR")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("NTEQL")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("LSEQL")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        else if(token.code == lex.codeFor("GREQL")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+
+		trace("Relop", false);
+        return recur;
+    } 
+    
+    private int StringConstant(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("StringConstant", true);
+		
+        if(token.code == lex.codeFor("STRNG")){
+            recur = token.code;
+            token = lex.GetNextToken();
+        }
+        
+		trace("StringConstant", false);
+        return recur;
+    } 
     /*
      * This method is called inside of Factor and handles the non-terminal "UnsignedConstant."
      * The only thing that this non-terminal does is call UnsignedNumber, since they are the same thing.
@@ -510,16 +586,32 @@ public class Syntactic
 
         trace("Statement", true);
 
-        if (token.code == lex.codeFor("IDENT")) {  //must be an ASSIGNMENT
+        if (token.code == lex.codeFor("IDENT")) {
             recur = handleAssignment();
         } 
         else {
-            if (token.code == lex.codeFor("___IF")) {  //must be an IF
-                // this would handle the rest of the IF statment IN PART B
-            } else 
-		    // if/elses should look for the other possible statement starts...  
-            //  but not until PART B
-            {
+            if (token.code == lex.codeFor("BEGIN")) {
+               recur = BlockBody();
+            } 
+            else if(token.code == lex.codeFor("___IF")){ 
+                recur = handleIf();
+            }
+            else if(token.code == lex.codeFor("DOWHL")){ 
+                recur = handleWhile();
+            }
+            else if(token.code == lex.codeFor("RPEAT")){ 
+                recur = handleRepeat();
+            }
+            else if(token.code == lex.codeFor("__FOR")){ 
+                recur = handleFor();
+            }
+            else if(token.code == lex.codeFor("WRILN")){
+                recur = handleWriteln();
+            }
+            else if(token.code == lex.codeFor("REALN")){
+                recur = handleReadln();
+            }
+            else{
                 error("Statement start", token.lexeme);
             }
         }
@@ -528,6 +620,144 @@ public class Syntactic
         return recur;
     }
 
+    private int handleIf(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleIf", true);
+		
+        token = lex.GetNextToken();
+        recur = RelExpression();
+
+        if(token.code == lex.codeFor("_THEN")){
+            token = lex.GetNextToken();
+            recur = Statement();
+        }
+        else{
+            error("Then", token.lexeme);
+        }
+        if(token.code == lex.codeFor("_ELSE")){
+            token = lex.GetNextToken();
+            recur = Statement();
+        }
+        
+		trace("handleIf", false);
+        return recur;
+    } 
+
+    private int handleWhile(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleWhile", true);
+		
+        token = lex.GetNextToken();
+        recur = RelExpression();
+
+        recur = Statement();
+        
+		trace("handleWhile", false);
+        return recur;
+    } 
+
+    private int handleRepeat(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleRepeat", true);
+
+		token = lex.GetNextToken();
+        recur = Statement();
+
+        if(token.code == lex.codeFor("UNTIL")){
+            token = lex.GetNextToken();
+            recur = RelExpression();
+        }
+        
+		trace("handleRepeat", false);
+        return recur;
+    } 
+
+    private int handleFor(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleFor", true);
+		
+        token = lex.GetNextToken();
+        recur = Variable();
+
+        if(token.code == lex.codeFor("ASIGN")){
+            token = lex.GetNextToken();
+            recur = SimpleExpression();
+            if(token.code == lex.codeFor("___TO")){
+                token = lex.GetNextToken();
+                recur = SimpleExpression();
+            }
+            if(token.code == lex.codeFor("___DO")){
+                token = lex.GetNextToken();
+                recur = Statement();
+            }
+        }
+
+		trace("handleFor", false);
+        return recur;
+    } 
+
+    private int handleWriteln(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleWriteln", true);
+		
+        token = lex.GetNextToken();
+        if(token.code == lex.codeFor("LPREN")){
+            token = lex.GetNextToken();
+            if(token.code == lex.codeFor("IDENT")){
+                recur = Variable();
+            }
+            else{
+                recur = StringConstant();
+            }
+            if(token.code == lex.codeFor("RPREN")){
+                token = lex.GetNextToken();
+            }
+        }
+        
+        
+		trace("handleeWriteln", false);
+        return recur;
+    } 
+
+    private int handleReadln(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("handleReadln", true);
+		token = lex.GetNextToken();
+        if(token.code == lex.codeFor("LPREN")){
+            token = lex.GetNextToken();
+            recur = Variable();
+            if(token.code == lex.codeFor("RPREN")){
+                token = lex.GetNextToken();
+            }
+        }
+        
+		trace("handleReadln", false);
+        return recur;
+    } 
     //Non-terminal VARIABLE just looks for an IDENTIFIER.  Later, a
     //  type-check can verify compatible math ops, or if casting is required.    
     private int Variable(){
@@ -594,22 +824,19 @@ public class Syntactic
 
     /*  Template for all the non-terminal method bodies
     // ALL OF THEM SHOULD LOOK LIKE THE FOLLOWING AT THE ENTRY/EXIT POINTS  
-    private int exampleNonTerminal(){
-        int recur = 0;   //Return value used later
-        if (anyErrors) { // Error check for fast exit, error status -1
+    private int (){
+        int recur = 0;  
+        if (anyErrors) { 
             return -1;
         }
 
-        trace("NameOfThisMethod", true);
+        trace("", true);
 		
-    // The unique non-terminal stuff goes here, assigning to "recur" based
-    //     on recursive calls that were made
+    
         
-		trace("NameOfThisMethod", false);
-    // Final result of assigning to "recur" in the body is returned
+		trace("", false);
         return recur;
-
-    }  
+    } 
     */    
 }
 
