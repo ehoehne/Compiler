@@ -1,0 +1,384 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+INPUT FILE TO PROCESS IS: SyntaxB-GOOD.txt
+0001 UNIT GOOD3B;
+        _UNIT |         0015 |  UNIT
+--> Entering Program
+        IDENT |         0050 |  GOOD3B
+        SCOLN |         0036 |  ;
+0002 
+0003 (* This Part 3B test file should have NO errors! *)
+0004 VAR COUNT, TOTAL : INTEGER;
+        __VAR |         0013 |  VAR
+ --> Entering Block
+  --> Entering VariableDecSec
+   --> Entering VariableDeclaration
+        IDENT |         0050 |  COUNT
+        COMMA |         0044 |  ,
+        IDENT |         0050 |  TOTAL
+        COLON |         0047 |  :
+        INTGR |         0001 |  INTEGER
+    --> Entering SimpleType
+        SCOLN |         0036 |  ;
+    <-- Exiting SimpleType
+0005 VAR I : INTEGER;
+        __VAR |         0013 |  VAR
+        IDENT |         0050 |  I
+        COLON |         0047 |  :
+        INTGR |         0001 |  INTEGER
+    --> Entering SimpleType
+        SCOLN |         0036 |  ;
+    <-- Exiting SimpleType
+0006 VAR STOP : integer;
+        __VAR |         0013 |  VAR
+        IDENT |         0050 |  STOP
+        COLON |         0047 |  :
+        INTGR |         0001 |  integer
+    --> Entering SimpleType
+        SCOLN |         0036 |  ;
+    <-- Exiting SimpleType
+0007 
+0008 BEGIN
+        BEGIN |         0011 |  BEGIN
+   <-- Exiting VariableDeclaration
+  <-- Exiting VariableDecSec
+  --> Entering BlockBody
+0009 READLN(STOP);
+        REALN |         0010 |  READLN
+   --> Entering Statement
+    --> Entering handleReadln
+        LPREN |         0034 |  (
+        IDENT |         0050 |  STOP
+     --> Entering Variable
+        RPREN |         0035 |  )
+     <-- Exiting Variable
+        SCOLN |         0036 |  ;
+    <-- Exiting handleReadln
+   <-- Exiting Statement
+0010 TOTAL := 12;
+        IDENT |         0050 |  TOTAL
+   --> Entering Statement
+    --> Entering handleAssignment
+     --> Entering Variable
+        ASIGN |         0037 |  :=
+     <-- Exiting Variable
+        INTGR |         0001 |  12
+     --> Entering SimpleExpression
+      --> Entering Term
+       --> Entering Factor
+        --> Entering UnsignedConstant
+         --> Entering UnsignedNumber
+        SCOLN |         0036 |  ;
+         <-- Exiting UnsignedNumber
+        <-- Exiting UnsignedConstant
+       <-- Exiting Factor
+      <-- Exiting Term
+     <-- Exiting SimpleExpression
+    <-- Exiting handleAssignment
+   <-- Exiting Statement
+0011 FOR I := 1 TO STOP DO
+        __FOR |         0007 |  FOR
+   --> Entering Statement
+    --> Entering handleFor
+        IDENT |         0050 |  I
+     --> Entering Variable
+        ASIGN |         0037 |  :=
+     <-- Exiting Variable
+        INTGR |         0001 |  1
+     --> Entering SimpleExpression
+      --> Entering Term
+       --> Entering Factor
+        --> Entering UnsignedConstant
+         --> Entering UnsignedNumber
+        ___TO |         0002 |  TO
+         <-- Exiting UnsignedNumber
+        <-- Exiting UnsignedConstant
+       <-- Exiting Factor
+      <-- Exiting Term
+     <-- Exiting SimpleExpression
+        IDENT |         0050 |  STOP
+     --> Entering SimpleExpression
+      --> Entering Term
+       --> Entering Factor
+        --> Entering Variable
+        ___DO |         0003 |  DO
+        <-- Exiting Variable
+       <-- Exiting Factor
+      <-- Exiting Term
+     <-- Exiting SimpleExpression
+0012   BEGIN
+        BEGIN |         0011 |  BEGIN
+     --> Entering Statement
+      --> Entering BlockBody
+0013   TOTAL := TOTAL + I
+        IDENT |         0050 |  TOTAL
+       --> Entering Statement
+        --> Entering handleAssignment
+         --> Entering Variable
+        ASIGN |         0037 |  :=
+         <-- Exiting Variable
+        IDENT |         0050 |  TOTAL
+         --> Entering SimpleExpression
+          --> Entering Term
+           --> Entering Factor
+            --> Entering Variable
+        __ADD |         0032 |  +
+            <-- Exiting Variable
+           <-- Exiting Factor
+          <-- Exiting Term
+          --> Entering Addop
+        IDENT |         0050 |  I
+          <-- Exiting Addop
+          --> Entering Term
+           --> Entering Factor
+            --> Entering Variable
+0014   END;
+        __END |         0012 |  END
+            <-- Exiting Variable
+           <-- Exiting Factor
+          <-- Exiting Term
+         <-- Exiting SimpleExpression
+        <-- Exiting handleAssignment
+       <-- Exiting Statement
+        SCOLN |         0036 |  ;
+      <-- Exiting BlockBody
+     <-- Exiting Statement
+    <-- Exiting handleFor
+   <-- Exiting Statement
+0015 
+0016 REPEAT
+        RPEAT |         0017 |  REPEAT
+   --> Entering Statement
+    --> Entering handleRepeat
+0017   TOTAL := TOTAL - 1
+        IDENT |         0050 |  TOTAL
+     --> Entering Statement
+      --> Entering handleAssignment
+       --> Entering Variable
+        ASIGN |         0037 |  :=
+       <-- Exiting Variable
+        IDENT |         0050 |  TOTAL
+       --> Entering SimpleExpression
+        --> Entering Term
+         --> Entering Factor
+          --> Entering Variable
+        __SUB |         0033 |  -
+          <-- Exiting Variable
+         <-- Exiting Factor
+        <-- Exiting Term
+        --> Entering Addop
+        INTGR |         0001 |  1
+        <-- Exiting Addop
+        --> Entering Term
+         --> Entering Factor
+          --> Entering UnsignedConstant
+           --> Entering UnsignedNumber
+0018 UNTIL TOTAL <= 20;
+        UNTIL |         0018 |  UNTIL
+           <-- Exiting UnsignedNumber
+          <-- Exiting UnsignedConstant
+         <-- Exiting Factor
+        <-- Exiting Term
+       <-- Exiting SimpleExpression
+      <-- Exiting handleAssignment
+     <-- Exiting Statement
+        IDENT |         0050 |  TOTAL
+     --> Entering RelExpression
+      --> Entering SimpleExpression
+       --> Entering Term
+        --> Entering Factor
+         --> Entering Variable
+        LSEQL |         0041 |  <=
+         <-- Exiting Variable
+        <-- Exiting Factor
+       <-- Exiting Term
+      <-- Exiting SimpleExpression
+      --> Entering Relop
+        INTGR |         0001 |  20
+      <-- Exiting Relop
+      --> Entering SimpleExpression
+       --> Entering Term
+        --> Entering Factor
+         --> Entering UnsignedConstant
+          --> Entering UnsignedNumber
+        SCOLN |         0036 |  ;
+          <-- Exiting UnsignedNumber
+         <-- Exiting UnsignedConstant
+        <-- Exiting Factor
+       <-- Exiting Term
+      <-- Exiting SimpleExpression
+     <-- Exiting RelExpression
+    <-- Exiting handleRepeat
+   <-- Exiting Statement
+0019 
+0020 IF TOTAL > 15 THEN
+        ___IF |         0004 |  IF
+   --> Entering Statement
+    --> Entering handleIf
+        IDENT |         0050 |  TOTAL
+     --> Entering RelExpression
+      --> Entering SimpleExpression
+       --> Entering Term
+        --> Entering Factor
+         --> Entering Variable
+        _GRTR |         0038 |  >
+         <-- Exiting Variable
+        <-- Exiting Factor
+       <-- Exiting Term
+      <-- Exiting SimpleExpression
+      --> Entering Relop
+        INTGR |         0001 |  15
+      <-- Exiting Relop
+      --> Entering SimpleExpression
+       --> Entering Term
+        --> Entering Factor
+         --> Entering UnsignedConstant
+          --> Entering UnsignedNumber
+        _THEN |         0005 |  THEN
+          <-- Exiting UnsignedNumber
+         <-- Exiting UnsignedConstant
+        <-- Exiting Factor
+       <-- Exiting Term
+      <-- Exiting SimpleExpression
+     <-- Exiting RelExpression
+0021   BEGIN
+        BEGIN |         0011 |  BEGIN
+     --> Entering Statement
+      --> Entering BlockBody
+0022   DOWHILE TOTAL > 10 
+        DOWHL |         0014 |  DOWHILE
+       --> Entering Statement
+        --> Entering handleWhile
+        IDENT |         0050 |  TOTAL
+         --> Entering RelExpression
+          --> Entering SimpleExpression
+           --> Entering Term
+            --> Entering Factor
+             --> Entering Variable
+        _GRTR |         0038 |  >
+             <-- Exiting Variable
+            <-- Exiting Factor
+           <-- Exiting Term
+          <-- Exiting SimpleExpression
+          --> Entering Relop
+        INTGR |         0001 |  10
+          <-- Exiting Relop
+          --> Entering SimpleExpression
+           --> Entering Term
+            --> Entering Factor
+             --> Entering UnsignedConstant
+              --> Entering UnsignedNumber
+0023     TOTAL := TOTAL - (2 * 1)
+        IDENT |         0050 |  TOTAL
+              <-- Exiting UnsignedNumber
+             <-- Exiting UnsignedConstant
+            <-- Exiting Factor
+           <-- Exiting Term
+          <-- Exiting SimpleExpression
+         <-- Exiting RelExpression
+         --> Entering Statement
+          --> Entering handleAssignment
+           --> Entering Variable
+        ASIGN |         0037 |  :=
+           <-- Exiting Variable
+        IDENT |         0050 |  TOTAL
+           --> Entering SimpleExpression
+            --> Entering Term
+             --> Entering Factor
+              --> Entering Variable
+        __SUB |         0033 |  -
+              <-- Exiting Variable
+             <-- Exiting Factor
+            <-- Exiting Term
+            --> Entering Addop
+        LPREN |         0034 |  (
+            <-- Exiting Addop
+            --> Entering Term
+             --> Entering Factor
+        INTGR |         0001 |  2
+              --> Entering SimpleExpression
+               --> Entering Term
+                --> Entering Factor
+                 --> Entering UnsignedConstant
+                  --> Entering UnsignedNumber
+        _MULT |         0031 |  *
+                  <-- Exiting UnsignedNumber
+                 <-- Exiting UnsignedConstant
+                <-- Exiting Factor
+                --> Entering Mulop
+        INTGR |         0001 |  1
+                <-- Exiting Mulop
+                --> Entering Factor
+                 --> Entering UnsignedConstant
+                  --> Entering UnsignedNumber
+        RPREN |         0035 |  )
+                  <-- Exiting UnsignedNumber
+                 <-- Exiting UnsignedConstant
+                <-- Exiting Factor
+               <-- Exiting Term
+              <-- Exiting SimpleExpression
+0024   END
+        __END |         0012 |  END
+             <-- Exiting Factor
+            <-- Exiting Term
+           <-- Exiting SimpleExpression
+          <-- Exiting handleAssignment
+         <-- Exiting Statement
+        <-- Exiting handleWhile
+       <-- Exiting Statement
+0025 ELSE
+        _ELSE |         0006 |  ELSE
+      <-- Exiting BlockBody
+     <-- Exiting Statement
+0026   IF TOTAL < 12 THEN
+        ___IF |         0004 |  IF
+     --> Entering Statement
+      --> Entering handleIf
+        IDENT |         0050 |  TOTAL
+       --> Entering RelExpression
+        --> Entering SimpleExpression
+         --> Entering Term
+          --> Entering Factor
+           --> Entering Variable
+        _LESS |         0039 |  <
+           <-- Exiting Variable
+          <-- Exiting Factor
+         <-- Exiting Term
+        <-- Exiting SimpleExpression
+        --> Entering Relop
+        INTGR |         0001 |  12
+        <-- Exiting Relop
+        --> Entering SimpleExpression
+         --> Entering Term
+          --> Entering Factor
+           --> Entering UnsignedConstant
+            --> Entering UnsignedNumber
+        _THEN |         0005 |  THEN
+            <-- Exiting UnsignedNumber
+           <-- Exiting UnsignedConstant
+          <-- Exiting Factor
+         <-- Exiting Term
+        <-- Exiting SimpleExpression
+       <-- Exiting RelExpression
+0027     WRITELN(TOTAL)
+        WRILN |         0009 |  WRITELN
+       --> Entering Statement
+        --> Entering handleWriteln
+        LPREN |         0034 |  (
+        IDENT |         0050 |  TOTAL
+         --> Entering Variable
+        RPREN |         0035 |  )
+         <-- Exiting Variable
+0028 END.
+        __END |         0012 |  END
+        <-- Exiting handleWriteln
+       <-- Exiting Statement
+      <-- Exiting handleIf
+     <-- Exiting Statement
+    <-- Exiting handleIf
+   <-- Exiting Statement
+        __DOT |         0048 |  .
+  <-- Exiting BlockBody
+ <-- Exiting Block
+Success.
+<-- Exiting Program
+Done.

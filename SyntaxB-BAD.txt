@@ -1,0 +1,31 @@
+UNIT BAD3B;
+
+(* This Part 3B test file has errors listed below *)
+VAR COUNT, TOTAL : INTEGER;
+
+VAR STOP : integer;
+
+BEGIN
+READLN(STOP);
+TOTAL := 12;
+(* I is undeclared, a message to that effect should print, and continue on *)
+FOR I := 1 TO STOP DO
+  BEGIN
+  TOTAL := TOTAL + I
+  END;
+
+(* Things go bad, not a statement start below, show EXPECTED,
+   set ANYERRORS true, and resynch with statement-level parsing*)
+UNTIL TOTAL <= 20;
+
+(*Should find the following as a good statement *)
+IF TOTAL > 15 THEN
+  BEGIN
+  DOWHILE TOTAL > 10 
+    TOTAL := TOTAL - (2 * 1)
+  END
+ELSE
+  IF TOTAL < 12 THEN
+    WRITELN(TOTAL);
+
+END.
