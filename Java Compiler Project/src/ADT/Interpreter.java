@@ -121,9 +121,12 @@ public class Interpreter
                             PC++;
                             break;
 
-                        case READ:     //not used in part 3, implemented using scanner
+                        case READ:    //Read Line
+                            System.out.println(">");
                             int inVal = in.nextInt();
-                            S.UpdateSymbol(op1, S.GetUsage(op1), inVal);
+                            S.UpdateSymbol(op3, S.GetUsage(op3), inVal);
+                            in.close();
+                            PC++;
                             break;
 
                         case JMP:     //unconditional jump
@@ -209,6 +212,11 @@ public class Interpreter
             optable.Add("JNP", 13);
             optable.Add("JNN", 14);
             optable.Add("JINDR", 15);
+        }
+
+        public int opcodeFor(String opName)
+        {
+            return optable.LookupName(opName);
         }
     //#endregion
 

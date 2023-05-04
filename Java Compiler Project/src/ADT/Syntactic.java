@@ -1,24 +1,39 @@
 package ADT;
 
+import java.io.IOException;
+
 public class Syntactic 
 {
     //Eli Hoehne, 4886, CS4100, SPRING 2023
 
     private String filein;              //The full file path to input file
     private SymbolTable symbolList;     //Symbol table storing ident/const
+    private QuadTable quads;            //Quad table to be used in interp
+    private Interpreter interp;         //the interpreter to be used in syntactic
     private Lexical lex;                //Lexical analyzer 
     private Lexical.token token;        //Next Token retrieved 
     private boolean traceon;            //Controls tracing mode 
     private int level = 0;              //Controls indent for trace mode
     private boolean anyErrors;          //Set TRUE if an error happens 
     private boolean firstDecSec;
+
     private final int symbolSize = 250;
+    private final int quadSize = 1000;
+    private int Minus1Index;
+    private int Plus1Index;
 
     public Syntactic(String filename, boolean traceOn) {
         filein = filename;
         traceon = traceOn;
+
         symbolList = new SymbolTable(symbolSize);
         lex = new Lexical(filein, symbolList, true);
+        quads = new QuadTable(quadSize);
+        interp = new Interpreter();
+
+        Minus1Index = symbolList.AddSymbol("-1", 'C', -1);
+        Plus1Index = symbolList.AddSymbol("1", 'C', 1);
+
         lex.setPrintToken(traceOn);
         anyErrors = false;
         firstDecSec = true;
@@ -26,12 +41,28 @@ public class Syntactic
 
     //The interface to the syntax analyzer, initiates parsing
     // Uses variable RECUR to get return values throughout the non-terminal methods    
-    public void parse() {
+    public void parse() throws IOException {
         int recur = 0;
+        String filenameBase = filein.substring(0, filein.length() - 4);
+        System.out.println(filenameBase);
         // prime the pump to get the first token to process
         token = lex.GetNextToken();
         // call PROGRAM
         recur = Program();
+
+        quads.AddQuad(interp.opcodeFor("STOP"), 0, 0, 0);
+
+        symbolList.PrintSymbolTable(filenameBase + "ST-before.txt");
+        quads.PrintQuadTable(filenameBase + "Quads.txt");
+
+        /* Interpret */
+        if(!anyErrors){
+            interp.InterpretQuads(quads, symbolList, false, filenameBase + "Trace.txt");
+        }
+        else{
+            System.out.println("ERRORS. Unable to run program.");
+        }
+        symbolList.PrintSymbolTable(filenameBase + "ST-after.txt");
     }
 
     //Non Terminal PROGIDENTIFIER is fully implemented here, leave it as-is.        
@@ -166,23 +197,24 @@ public class Syntactic
     //Not a NT, but used to shorten Statement code body for readability.   
     //<variable> $COLON-EQUALS <simple expression>
     private int handleAssignment() {
-        int recur = 0;
+        int left = 0;
+        int right = 0;
         if (anyErrors) {
             return -1;
         }
         trace("handleAssignment", true);
         //have ident already in order to get to here, handle as Variable
-        recur = Variable();  //Variable moves ahead, next token ready
+        left = Variable();  //Variable moves ahead, next token ready
 
-        if (token.code == lex.codeFor("ASIGN")) {   //was ASGN
+        if (token.code == lex.codeFor("ASIGN")) {
             token = lex.GetNextToken();
-            recur = SimpleExpression();
+            right = SimpleExpression();
         } else {
-            error(lex.reserveFor("ASIGN"), token.lexeme);   //was ASGN
+            error(lex.reserveFor("ASIGN"), token.lexeme);
         }
 
         trace("handleAssignment", false);
-        return recur;
+        return right; /* not sure if "right" is correct return value */
     }
 
     /*
@@ -575,7 +607,7 @@ public class Syntactic
         trace("StringConstant", true);
 		
         if(token.code == lex.codeFor("STRNG")){
-            recur = token.code;
+            recur = symbolList.LookupSymbol(token.lexeme);
             token = lex.GetNextToken();
         }
         
@@ -622,15 +654,13 @@ public class Syntactic
 
         trace("UnsignedNumber", true);
 		
-        if(token.code == lex.codeFor("INTGR")){
-            recur = Integer.parseInt(token.lexeme);
+        if(token.code == lex.codeFor("INTGR") || token.code == lex.codeFor("FLOAT")){
+            recur = symbolList.LookupSymbol(token.lexeme); 
             token = lex.GetNextToken();
         }
-        else if(token.code == lex.codeFor("FLOAT")){
-            Double.parseDouble(token.lexeme);
-            token = lex.GetNextToken();
+        else{
+            error("Integer or Float", token.lexeme);
         }
-        
 		trace("UnsignedNumber", false);
         return recur;
 
@@ -808,6 +838,7 @@ public class Syntactic
      */
     private int handleWriteln(){
         int recur = 0;  
+        int toPrint = 0;
         if (anyErrors) { 
             return -1;
         }
@@ -817,17 +848,24 @@ public class Syntactic
         token = lex.GetNextToken();
         if(token.code == lex.codeFor("LPREN")){
             token = lex.GetNextToken();
-            if(token.code == lex.codeFor("IDENT")){
-                recur = Variable();
+            if(token.code == lex.codeFor("STRNG") || token.code == lex.codeFor("IDENT")){
+                toPrint = symbolList.LookupSymbol(token.lexeme);
+                token = lex.GetNextToken();
             }
             else{
-                recur = StringConstant();
+                toPrint = SimpleExpression();
             }
+            quads.AddQuad(interp.opcodeFor("PRINT"), 0, 0, toPrint);
             if(token.code == lex.codeFor("RPREN")){
                 token = lex.GetNextToken();
             }
+            else{
+                error(")", token.lexeme);
+            }
         }
-        
+        else{
+            error("(", token.lexeme);
+        }
         
 		trace("handleWriteln", false);
         return recur;
@@ -868,6 +906,7 @@ public class Syntactic
 
         trace("Variable", true);
         if ((token.code == lex.codeFor("IDENT"))) { 
+            recur = symbolList.LookupSymbol(token.lexeme);
             // bookkeeping and move on
             token = lex.GetNextToken();
         }
