@@ -209,12 +209,13 @@ public class Syntactic
         if (token.code == lex.codeFor("ASIGN")) {
             token = lex.GetNextToken();
             right = SimpleExpression();
+            quads.AddQuad(interp.opcodeFor("MOV"), right, 0, left);
         } else {
             error(lex.reserveFor("ASIGN"), token.lexeme);
         }
 
         trace("handleAssignment", false);
-        return right; /* not sure if "right" is correct return value */
+        return left;
     }
 
     /*
@@ -351,37 +352,32 @@ public class Syntactic
      */
     private int SimpleExpression() {
         int recur = 0;
+        int left, right, signVal, temp, opcode;
         if (anyErrors) {
             return -1;
         }
 
         trace("SimpleExpression", true);
         
-        //[<sign>]
-        int sign = lex.codeFor("__ADD"); //If not present, assume it is positive. 
-        if(token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")){
-            sign = Sign();
-        }
-
-        int term = Term();  //<term>
-
-        if(sign == lex.codeFor("__ADD")){
-            recur += term;
-        }
-        else{
-            recur -= term;
+        signVal = Sign();   //<sign>
+        left = Term();      //<term>
+        if(signVal == -1){
+            quads.AddQuad(interp.opcodeFor("MUL"), left, Minus1Index, left);
         }
 
         //{<addop> <term>}*
         while((token.code == lex.codeFor("__ADD") || token.code == lex.codeFor("__SUB")) && !anyErrors){
-            int addop = Addop();
-            term = Term();
-            if(addop == lex.codeFor("__ADD")){
-                recur += term;
+            if(token.code == lex.codeFor("__ADD")){
+                opcode = interp.opcodeFor("ADD");
             }
             else{
-                recur -= term;
+                opcode = interp.opcodeFor("SUB");
             }
+            token = lex.GetNextToken();
+            right = Term();
+            temp = GenSymbol();
+            quads.AddQuad(opcode, left, right, temp);
+            left = temp;
         }
         
         trace("SimpleExpression", false);
@@ -470,6 +466,20 @@ public class Syntactic
 
     } 
     
+    private int GenSymbol(){
+        int recur = 0;  
+        if (anyErrors) { 
+            return -1;
+        }
+
+        trace("GenSymbol", true);
+
+        recur = symbolList.AddSymbol("temp", 'C', "temp");
+
+		trace("GenSymbol", false);
+        return recur;
+    } 
+
     /*
      * Handles the Sign non-terminal. Will return the code based on the sign, and get the next token
      * Called inside of SimpleExpression.
@@ -484,12 +494,12 @@ public class Syntactic
 
         trace("Sign", true);
 
-        if(token.code == lex.codeFor("__ADD")){
-            recur = token.code;
+        recur = 1;
+        if(token.code == lex.codeFor("__SUB")){
+            recur = -1;
             token = lex.GetNextToken();
         }
-        else if(token.code == lex.codeFor("__SUB")){
-            recur = token.code;
+        else if(token.code == lex.codeFor("__ADD")){
             token = lex.GetNextToken();
         }
 
@@ -887,6 +897,7 @@ public class Syntactic
         if(token.code == lex.codeFor("LPREN")){
             token = lex.GetNextToken();
             recur = Variable();
+            quads.AddQuad(interp.opcodeFor("READ"), 0, 0, recur);
             if(token.code == lex.codeFor("RPREN")){
                 token = lex.GetNextToken();
             }

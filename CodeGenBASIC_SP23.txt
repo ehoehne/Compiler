@@ -1,0 +1,23 @@
+{This file includes the basic WRITELN, READLN, and EXPRESSION tests.
+}
+UNIT CodegenBASIC;
+begin
+WRITELN("BASIC TEST File SPRING 2023");
+
+WRITELN("String printout test:  Hello World");
+
+a := 3;
+WRITELN("First, a is initialized to");
+WRITELN(a);
+
+b := 2;
+a := a *(3+b)+ a + 2*b/2 - 1;  {The result: 19}
+WRITELN("After calculation, a is now ");
+WRITELN(a);
+WRITELN("Click in Console Window, and input a value of 25 for a: ");
+READLN(a);
+WRITELN("After READLN, a is now ");
+WRITELN(a);
+WRITELN("All done.")
+end. 
+

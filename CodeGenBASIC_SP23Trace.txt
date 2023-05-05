@@ -1,0 +1,13 @@
+Eli Hoehne CS 4100 Homework 3 Spring 2023
+
+BASIC TEST File SPRING 2023 = BASIC TEST File SPRING 2023
+String printout test:  Hello World = String printout test:  Hello World
+First, a is initialized to = First, a is initialized to
+a = 0
+After calculation, a is now  = After calculation, a is now 
+a = 0
+Click in Console Window, and input a value of 25 for a:  = Click in Console Window, and input a value of 25 for a: 
+After READLN, a is now  = After READLN, a is now 
+a = 0
+All done. = All done.
+Execution terminated by program STOP

@@ -32,10 +32,10 @@ public class Main
         //Eli Hoehne, 4886, CS4100, SPRING 2023
         System.out.println("Eli Hoehne, 4886, CS4100, SPRING 2023");
         
-        String filePath = args[0];
+        String filePath = "CodeGenBASIC_SP23.txt";
         System.out.println("Code Generation SP2023, by Eli Hoehne");
         System.out.println("Parsing " + filePath);
-        boolean traceon = true; //false;
+        boolean traceon = false;
         Syntactic parser = new Syntactic(filePath, traceon);
         parser.parse();
         System.out.println("Done.");
