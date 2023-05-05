@@ -148,7 +148,7 @@ public class SymbolTable
 
             for(int i = 0; i <= count; i++)
             {
-                if(table[i].dataType == 'I' && table[i].integerValue != 0)
+                if(table[i].dataType == 'I' /*&& table[i].integerValue != 0*/)
                     pw.printf("%3d  | %-25s | %-3c | %-3c | %-3d \n", i, this.table[i].name, this.table[i].usage, this.table[i].dataType, this.table[i].integerValue);
                 else if(table[i].dataType == 'S' && table[i].stringValue != null)
                 pw.printf("%3d  | %-25s | %-3c | %-3c | %s \n", i, this.table[i].name, this.table[i].usage, this.table[i].dataType, this.table[i].stringValue);

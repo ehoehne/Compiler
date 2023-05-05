@@ -21,6 +21,7 @@ public class Syntactic
     private final int quadSize = 1000;
     private int Minus1Index;
     private int Plus1Index;
+    private int tCount = 0;
 
     public Syntactic(String filename, boolean traceOn) {
         filein = filename;
@@ -57,7 +58,7 @@ public class Syntactic
 
         /* Interpret */
         if(!anyErrors){
-            interp.InterpretQuads(quads, symbolList, false, filenameBase + "Trace.txt");
+            interp.InterpretQuads(quads, symbolList, true, filenameBase + "Trace.txt");
         }
         else{
             System.out.println("ERRORS. Unable to run program.");
@@ -375,13 +376,13 @@ public class Syntactic
             }
             token = lex.GetNextToken();
             right = Term();
-            temp = GenSymbol();
+            temp = symbolList.AddSymbol("@" + tCount++, 'V', 0);
             quads.AddQuad(opcode, left, right, temp);
             left = temp;
         }
         
         trace("SimpleExpression", false);
-        return recur;
+        return left;
     }
 
     /*
@@ -393,7 +394,8 @@ public class Syntactic
      * CFG: <term> -> <factor> {<mulop> <factor>}*
      */
     private int Term(){
-        int recur = 0;          
+        int recur = 0;       
+        int opcode, temp, factor;   
         if (anyErrors) {        
             return -1;
         }
@@ -401,18 +403,21 @@ public class Syntactic
         trace("Term", true);
 		
         //<factor>
-        int factor = Factor();
+        recur = Factor();
 
         //{<mulop> <factor>}*
         while((token.code == lex.codeFor("_MULT") || token.code == lex.codeFor("DIVID")) && !anyErrors){
-            int mulop = Mulop();
+            if(token.code == lex.codeFor("_MULT")){
+                opcode = interp.opcodeFor("MUL");
+            }
+            else{
+                opcode = interp.opcodeFor("DIV");
+            }
+            token = lex.GetNextToken();
             factor = Factor();
-            if(mulop == lex.codeFor("_MULT")){
-                recur *= factor;
-            }
-            else if(mulop == lex.codeFor("DIVID") && factor != 0){
-                recur /= factor;
-            }
+            temp = symbolList.AddSymbol("@" + tCount++, 'V', 0);
+            quads.AddQuad(opcode, recur, factor, temp);
+            recur = temp;
         }
         
 		trace("Term", false);
@@ -466,15 +471,17 @@ public class Syntactic
 
     } 
     
-    private int GenSymbol(){
-        int recur = 0;  
+    private int GenSymbol(int temp){
+        int recur = 0;
+        int count;  
         if (anyErrors) { 
             return -1;
         }
 
         trace("GenSymbol", true);
 
-        recur = symbolList.AddSymbol("temp", 'C', "temp");
+        recur = symbolList.AddSymbol("@" + ++temp, 'V', 0);
+        
 
 		trace("GenSymbol", false);
         return recur;
