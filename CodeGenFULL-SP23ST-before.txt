@@ -1,0 +1,24 @@
+Index  Name                       Use   Type  Value
+  0  | -1                        | C   | I   | -1  
+  1  | 1                         | C   | I   | 1   
+  2  | Codegen                   | P   | S   | 0 
+  3  | Full SPRING 2023 Test File | C   | S   | Full SPRING 2023 Test File 
+  4  | factorial                 | V   | S   | 0 
+  5  | Click in the CONSOLE WINDOW, and enter the value 6 for n: | C   | S   | Click in the CONSOLE WINDOW, and enter the value 6 for n: 
+  6  | n                         | V   | S   | 0 
+  7  | count                     | V   | S   | 0 
+  8  | @0                        | V   | I   | 0   
+  9  | @1                        | V   | I   | 0   
+ 10  | @2                        | V   | I   | 0   
+ 11  | The calculation of 6! is: | C   | S   | The calculation of 6! is: 
+ 12  |                           | C   | S   |   
+ 13  | @3                        | V   | I   | 0   
+ 14  | 3                         | C   | I   | 3   
+ 15  | @4                        | V   | I   | 0   
+ 16  | 2                         | C   | I   | 2   
+ 17  | @5                        | V   | I   | 0   
+ 18  | Count - 3 is greater than 2 | C   | S   | Count - 3 is greater than 2 
+ 19  | Count - 3 is less than or equal to 2 | C   | S   | Count - 3 is less than or equal to 2 
+ 20  | @6                        | V   | I   | 0   
+ 21  | Count is:                 | C   | S   | Count is:  
+ 22  | All done.                 | C   | S   | All done. 

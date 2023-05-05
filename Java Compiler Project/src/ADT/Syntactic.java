@@ -58,7 +58,7 @@ public class Syntactic
 
         /* Interpret */
         if(!anyErrors){
-            interp.InterpretQuads(quads, symbolList, true, filenameBase + "Trace.txt");
+            interp.InterpretQuads(quads, symbolList, false, filenameBase + "Trace.txt");
         }
         else{
             System.out.println("ERRORS. Unable to run program.");
@@ -162,7 +162,6 @@ public class Syntactic
             } 
             //handles resynching when an error is found.
             //will skip over any left over tokens after the error, and moke onto the next statement.
-            //will also skip over the extra ; found after the writeln, in BAD, as mentioned in class. 
             else if(token.code != lex.codeFor("__END") && anyErrors){
                 token = lex.GetNextToken();
                 while(token.code != lex.codeFor("SCOLN")){
@@ -324,19 +323,22 @@ public class Syntactic
      * CFG: <relexpression> -> <simple expression> <relop> <simple expression>
      */
     private int RelExpression(){
-        int recur = 0;  
+        int left, right, saveRelop, recur, temp;
         if (anyErrors) { 
             return -1;
         }
 
         trace("RelExpression", true);
 		
-        recur = SimpleExpression(); //<simple expression>
+        left = SimpleExpression(); //get left operand
+        saveRelop = Relop();    //<relop>
+        right = SimpleExpression(); //get right operand
+        temp = GenSymbol();
 
-        recur = Relop();    //<relop>
+        quads.AddQuad(interp.opcodeFor("SUB"), left, right, temp);
+        recur = quads.NextQuad();
+        quads.AddQuad(relopToOpcode(saveRelop), temp, 0, 0);
 
-        recur = SimpleExpression(); //<simple expression>
-        
 		trace("RelExpression", false);
     
         return recur;
@@ -352,7 +354,6 @@ public class Syntactic
      * CFG: <simple expression> -> [<sign>] <term> {<addop> <term>}*
      */
     private int SimpleExpression() {
-        int recur = 0;
         int left, right, signVal, temp, opcode;
         if (anyErrors) {
             return -1;
@@ -376,7 +377,7 @@ public class Syntactic
             }
             token = lex.GetNextToken();
             right = Term();
-            temp = symbolList.AddSymbol("@" + tCount++, 'V', 0);
+            temp = GenSymbol();
             quads.AddQuad(opcode, left, right, temp);
             left = temp;
         }
@@ -415,7 +416,7 @@ public class Syntactic
             }
             token = lex.GetNextToken();
             factor = Factor();
-            temp = symbolList.AddSymbol("@" + tCount++, 'V', 0);
+            temp = GenSymbol();
             quads.AddQuad(opcode, recur, factor, temp);
             recur = temp;
         }
@@ -471,18 +472,16 @@ public class Syntactic
 
     } 
     
-    private int GenSymbol(int temp){
-        int recur = 0;
-        int count;  
+    private int GenSymbol(){
+        int recur = 0; 
         if (anyErrors) { 
             return -1;
         }
 
         trace("GenSymbol", true);
 
-        recur = symbolList.AddSymbol("@" + ++temp, 'V', 0);
+        recur = symbolList.AddSymbol("@" + tCount++, 'V', 0);
         
-
 		trace("GenSymbol", false);
         return recur;
     } 
@@ -612,6 +611,25 @@ public class Syntactic
         return recur;
     } 
     
+    private int relopToOpcode(int relop)
+    {
+        int result = 0;
+
+        if(relop == lex.codeFor("EQUAL"))
+            result = interp.opcodeFor("JNZ");       
+        else if(relop == lex.codeFor("NTEQL"))
+            result = interp.opcodeFor("JZ");       
+        else if(relop == lex.codeFor("_LESS"))
+            result = interp.opcodeFor("JNN");      
+        else if(relop == lex.codeFor("_GRTR"))
+            result = interp.opcodeFor("JNP");      
+        else if(relop == lex.codeFor("LSEQL"))
+            result = interp.opcodeFor("JP");        
+        else if(relop == lex.codeFor("GREQL"))
+            result = interp.opcodeFor("JN");
+
+        return result;
+    }
     /*
      * Added in B. Handles type checking for a string constant.
      */
@@ -740,6 +758,7 @@ public class Syntactic
      */
     private int handleIf(){
         int recur = 0;  
+        int branchQuad, patchElse;
         if (anyErrors) { 
             return -1;
         }
@@ -747,18 +766,24 @@ public class Syntactic
         trace("handleIf", true);
 		
         token = lex.GetNextToken();
-        recur = RelExpression();
+        branchQuad = RelExpression();   /* tells branchTarget to be set to jump past TRUE */
 
         if(token.code == lex.codeFor("_THEN")){
             token = lex.GetNextToken();
             recur = Statement();
+            if(token.code == lex.codeFor("_ELSE")){
+                token = lex.GetNextToken();
+                patchElse = quads.NextQuad();                   /* save backfill quad to jump past else, target unknown */
+                quads.UpdateJump(branchQuad, quads.NextQuad()); /* conditional jump */
+                recur = Statement();                            /* else body quads */
+                quads.UpdateJump(patchElse, quads.NextQuad());
+            }
+            else{   /* no else encountered */
+                quads.UpdateJump(branchQuad, quads.NextQuad());
+            }
         }
-        else{
+        else{   /* no then encountered */
             error("Then", token.lexeme);
-        }
-        if(token.code == lex.codeFor("_ELSE")){
-            token = lex.GetNextToken();
-            recur = Statement();
         }
         
 		trace("handleIf", false);
@@ -771,7 +796,8 @@ public class Syntactic
      * CFG: $DOWHILE <relexpression> <statement>
      */
     private int handleWhile(){
-        int recur = 0;  
+        int recur = 0;
+        int saveTop, branchQuad;
         if (anyErrors) { 
             return -1;
         }
@@ -779,10 +805,18 @@ public class Syntactic
         trace("handleWhile", true);
 		
         token = lex.GetNextToken();
-        recur = RelExpression();
+        saveTop = quads.NextQuad();
+        branchQuad = RelExpression();
 
-        recur = Statement();
-        
+        if(token.code == lex.codeFor("BEGIN")){
+            recur = Statement();
+            quads.AddQuad(interp.opcodeFor("JMP"), 0, 0, saveTop);  /* jump to top of loop */
+            quads.UpdateJump(branchQuad, quads.NextQuad()); /* Conditional jumps next quad */
+        }
+        else{
+            error(lex.reserveFor("BEGIN"), token.lexeme);
+        }
+
 		trace("handleWhile", false);
         return recur;
     } 

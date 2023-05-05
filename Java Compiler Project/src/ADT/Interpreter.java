@@ -131,7 +131,6 @@ public class Interpreter
                         break;
 
                     case READ:    //Read Line
-                        pw.print(">");
                         System.out.print(">");
                         int inVal = in.nextInt();
                         S.UpdateSymbol(op3, S.GetUsage(op3), inVal);

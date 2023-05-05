@@ -1,0 +1,31 @@
+UNIT Codegen;
+begin
+WRITELN("Full SPRING 2023 Test File");
+
+factorial := 1;
+WRITELN("Click in the CONSOLE WINDOW, and enter the value 6 for n:");
+readln(n);  {should be same result as doing n := 6;}
+count := 1;
+dowhile count <= n
+  begin
+  factorial := factorial*count;
+  count := count + 1
+  end;
+WRITELN("The calculation of 6! is:"); {Expected result is 720}
+WRITELN(factorial);
+WRITELN(" "); {blank line}
+
+{count should be 7 at this point}
+dowhile count > 1
+  begin
+  WRITELN(count);
+  if count - 3 > 2 then
+    WRITELN("Count - 3 is greater than 2")
+  else
+    WRITELN("Count - 3 is less than or equal to 2");
+  count := count -1
+  end;
+WRITELN("Count is: ");
+WRITELN(count);
+WRITELN("All done.")
+end. 
