@@ -1,0 +1,64 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+Code Generation SP2023, by Eli Hoehne
+Parsing CodeGenBASIC_SP23.txt
+0001 {This file includes the basic WRITELN, READLN, and EXPRESSION tests.
+CodeGenBASIC_SP23
+0002 }
+0003 UNIT CodegenBASIC;
+0004 begin
+0005 WRITELN("BASIC TEST File SPRING 2023");
+0006 
+0007 WRITELN("String printout test:  Hello World");
+0008 
+0009 a := 3;
+0010 WRITELN("First, a is initialized to");
+0011 WRITELN(a);
+0012 
+0013 b := 2;
+0014 a := a *(3+b)+ a + 2*b/2 - 1;  {The result: 19}
+0015 WRITELN("After calculation, a is now ");
+0016 WRITELN(a);
+0017 WRITELN("Click in Console Window, and input a value of 25 for a: ");
+0018 READLN(a);
+0019 WRITELN("After READLN, a is now ");
+0020 WRITELN(a);
+0021 WRITELN("All done.")
+0022 end. 
+Success.
+Eli Hoehne CS 4100 Spring 2023
+
+PC = 0000: PRINT 00, 00, 03
+BASIC TEST File SPRING 2023
+PC = 0001: PRINT 00, 00, 04
+String printout test:  Hello World
+PC = 0002: MOV   06, 00, 05
+PC = 0003: PRINT 00, 00, 07
+First, a is initialized to
+PC = 0004: PRINT 00, 00, 05
+3
+PC = 0005: MOV   09, 00, 08
+PC = 0006: ADD   06, 08, 10
+PC = 0007: MUL   05, 10, 11
+PC = 0008: ADD   11, 05, 12
+PC = 0009: MUL   09, 08, 13
+PC = 0010: DIV   13, 09, 14
+PC = 0011: ADD   12, 14, 15
+PC = 0012: SUB   15, 01, 16
+PC = 0013: MOV   16, 00, 05
+PC = 0014: PRINT 00, 00, 17
+After calculation, a is now 
+PC = 0015: PRINT 00, 00, 05
+19
+PC = 0016: PRINT 00, 00, 18
+Click in Console Window, and input a value of 25 for a: 
+PC = 0017: READ  00, 00, 05
+>25
+PC = 0018: PRINT 00, 00, 19
+After READLN, a is now 
+PC = 0019: PRINT 00, 00, 05
+25
+PC = 0020: PRINT 00, 00, 20
+All done.
+PC = 0021: STOP  00, 00, 00
+Execution terminated by program STOP
+Done.

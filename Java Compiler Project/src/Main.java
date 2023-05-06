@@ -32,7 +32,7 @@ public class Main
         //Eli Hoehne, 4886, CS4100, SPRING 2023
         System.out.println("Eli Hoehne, 4886, CS4100, SPRING 2023");
         
-        String filePath = "CodeGenFULL-SP23.txt";
+        String filePath = args[0];
         System.out.println("Code Generation SP2023, by Eli Hoehne");
         System.out.println("Parsing " + filePath);
         boolean traceon = false;

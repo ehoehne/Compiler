@@ -1,0 +1,61 @@
+Eli Hoehne, 4886, CS4100, SPRING 2023
+Code Generation SP2023, by Eli Hoehne
+Parsing CodeGenFULL-SP23.txt
+0001 UNIT Codegen;
+CodeGenFULL-SP23
+0002 begin
+0003 WRITELN("Full SPRING 2023 Test File");
+0004 
+0005 factorial := 1;
+0006 WRITELN("Click in the CONSOLE WINDOW, and enter the value 6 for n:");
+0007 readln(n);  {should be same result as doing n := 6;}
+0008 count := 1;
+0009 dowhile count <= n
+0010   begin
+0011   factorial := factorial*count;
+0012   count := count + 1
+0013   end;
+0014 WRITELN("The calculation of 6! is:"); {Expected result is 720}
+0015 WRITELN(factorial);
+0016 WRITELN(" "); {blank line}
+0017 
+0018 {count should be 7 at this point}
+0019 dowhile count > 1
+0020   begin
+0021   WRITELN(count);
+0022   if count - 3 > 2 then
+0023     WRITELN("Count - 3 is greater than 2")
+0024   else
+0025     WRITELN("Count - 3 is less than or equal to 2");
+0026   count := count -1
+0027   end;
+0028 WRITELN("Count is: ");
+0029 WRITELN(count);
+0030 WRITELN("All done.")
+0031 end. 
+Success.
+Eli Hoehne CS 4100 Spring 2023
+
+Full SPRING 2023 Test File
+Click in the CONSOLE WINDOW, and enter the value 6 for n:
+>6
+The calculation of 6! is:
+720
+ 
+7
+Count - 3 is greater than 2
+6
+Count - 3 is greater than 2
+5
+Count - 3 is less than or equal to 2
+4
+Count - 3 is less than or equal to 2
+3
+Count - 3 is less than or equal to 2
+2
+Count - 3 is less than or equal to 2
+Count is: 
+1
+All done.
+Execution terminated by program STOP
+Done.

@@ -5,6 +5,8 @@ import java.util.Scanner;
 
 public class Interpreter 
 {   
+    //Eli Hoehne, 4886, CS4100, SPRING 2023
+
     //symbolic constants for each of the instructions to be used in interpreter
     static final int STOP = 0;
     static final int DIV = 1;
@@ -40,7 +42,7 @@ public class Interpreter
     * 
     *  Prints each trace line to a trace output file using the provided formatting function.
     *  Performs the required operations for each instruction.
-    *  Will print output to console AND to output file
+    *  Will print output to console AND to output file (more info if traceOn)
     */
     public void InterpretQuads(QuadTable Q, SymbolTable S, boolean TraceOn, String filename)
     {   
@@ -53,8 +55,9 @@ public class Interpreter
 
             //Required first comment
             //Eli Hoehne CS 4100 Homework 3 Spring 2023
-            pw.println("Eli Hoehne CS 4100 Homework 3 Spring 2023\n");
-
+            pw.println("Eli Hoehne CS 4100 Spring 2023\n");
+            System.out.println("Eli Hoehne CS 4100 Spring 2023\n");
+            
             //start PC at 0, create an array to hold current quad
             int PC = 0;
             int[] quad = new int[4];
@@ -70,9 +73,10 @@ public class Interpreter
                 int op3 = quad[3];
 
                 //print the trace string for current quad if TraceOn is true
-                if(TraceOn)
+                if(TraceOn){
                     pw.println(makeTraceString(PC, opcode, op1, op2, op3));  
-                    System.out.println(makeTraceString(PC, opcode, op1, op2, op3));
+                    System.out.println(makeTraceString(PC, opcode, op1, op2, op3)); /* added in codegen */
+                }
                 /*
                 *   Switch statement for each instruction, performs a different task based on which 
                 *   instruction the current quad is describing. 
@@ -112,7 +116,7 @@ public class Interpreter
                         PC++;
                         break;
 
-                    case PRINT:     //print statement prints correct value based on datatype in symbol table    
+                    case PRINT:     //print statement prints correct value (to console and file) based on datatype in symbol table    
                         if(S.GetDataType(op3) == 'I'){
                             pw.println(S.GetSymbol(op3) + " = " + S.GetInteger(op3));
                             System.out.println(S.GetInteger(op3));
@@ -121,8 +125,8 @@ public class Interpreter
                             pw.println(S.GetSymbol(op3) + " = " + S.GetFloat(op3));
                             System.out.println(S.GetFloat(op3));
                         }
-                        else if(S.GetDataType(op3) == 'S'){
-                            if(S.GetInteger(op3) != 0)
+                        else if(S.GetDataType(op3) == 'S'){ /* added ability to print integer value of a string */
+                            if(S.GetInteger(op3) != 0)      
                                 System.out.println(S.GetInteger(op3));
                             else
                                 System.out.println(S.GetSymbol(op3));
@@ -130,7 +134,7 @@ public class Interpreter
                         PC++;
                         break;
 
-                    case READ:    //Read Line
+                    case READ:    //Read Line (updated in codegen)
                         System.out.print(">");
                         int inVal = in.nextInt();
                         S.UpdateSymbol(op3, S.GetUsage(op3), inVal);
@@ -224,6 +228,7 @@ public class Interpreter
         optable.Add("JINDR", 15);
     }
 
+    /* added in codegen as a way to return the opcode for an instruction */
     public int opcodeFor(String opName)
     {
         return optable.LookupName(opName);

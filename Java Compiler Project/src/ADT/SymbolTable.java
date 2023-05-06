@@ -4,14 +4,19 @@ import java.io.*;
 //implements another class called Symbol, which the SymbolTable class creates an array of.
 public class SymbolTable 
 {
+    //Eli Hoehne, 4886, CS4100, SPRING 2023
+    
     //private
     private Symbol[] table;
     private int count;
-
+    static int genSymCount;
+    private final char genSymChar = '@';
+    private final char varKind = 'V'; 
     //constructor
     public SymbolTable(int maxSize)
     {
         table = new Symbol[maxSize];
+        genSymCount = 0;
         count = -1;
     }
 
@@ -93,6 +98,15 @@ public class SymbolTable
         }
         return result;
     }
+
+    /* added in codegen to add a temporary symbol with a unique name */
+    public int GenSymbol()
+    {
+        String name = genSymChar + Integer.toString(genSymCount);
+        genSymCount++;
+
+        return this.AddSymbol(name, varKind, 0);
+    } 
 
     //functions to update symbols, overloaded for the different types
     public void UpdateSymbol(int index, char usage, int value)

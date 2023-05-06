@@ -17,11 +17,10 @@ public class Syntactic
     private boolean anyErrors;          //Set TRUE if an error happens 
     private boolean firstDecSec;
 
-    private final int symbolSize = 250;
-    private final int quadSize = 1000;
-    private int Minus1Index;
+    private final int symbolSize = 250; //size of symbol table 
+    private final int quadSize = 1000;  //size of quad table
+    private int Minus1Index;            
     private int Plus1Index;
-    private int tCount = 0;
 
     public Syntactic(String filename, boolean traceOn) {
         filein = filename;
@@ -29,9 +28,12 @@ public class Syntactic
 
         symbolList = new SymbolTable(symbolSize);
         lex = new Lexical(filein, symbolList, true);
+
+        /* CodeGen: added creation of quads and interp 
+         *          addeed -1 and +1 indexes to symboltable
+        */
         quads = new QuadTable(quadSize);
         interp = new Interpreter();
-
         Minus1Index = symbolList.AddSymbol("-1", 'C', -1);
         Plus1Index = symbolList.AddSymbol("1", 'C', 1);
 
@@ -40,8 +42,7 @@ public class Syntactic
         firstDecSec = true;
     }
 
-    //The interface to the syntax analyzer, initiates parsing
-    // Uses variable RECUR to get return values throughout the non-terminal methods    
+    /* The interface to the syntax analyzer, initiates parsing */
     public void parse() throws IOException {
         int recur = 0;
         String filenameBase = filein.substring(0, filein.length() - 4);
@@ -51,19 +52,21 @@ public class Syntactic
         // call PROGRAM
         recur = Program();
 
-        quads.AddQuad(interp.opcodeFor("STOP"), 0, 0, 0);
+        quads.AddQuad(interp.opcodeFor("STOP"), 0, 0, 0);   /* add stop instruction to end of quads */
 
-        symbolList.PrintSymbolTable(filenameBase + "ST-before.txt");
-        quads.PrintQuadTable(filenameBase + "Quads.txt");
+        symbolList.PrintSymbolTable(filenameBase + "ST-before.txt");    /* print symbol table to file */
+        quads.PrintQuadTable(filenameBase + "Quads.txt");               /* print quad table to file */
 
         /* Interpret */
         if(!anyErrors){
+            /* start the interpreter, pass the completed quad and symboltables, as well as a trace output */
+            /* interpreter will print trace to console and to file if traceOn */
             interp.InterpretQuads(quads, symbolList, false, filenameBase + "Trace.txt");
         }
         else{
             System.out.println("ERRORS. Unable to run program.");
         }
-        symbolList.PrintSymbolTable(filenameBase + "ST-after.txt");
+        symbolList.PrintSymbolTable(filenameBase + "ST-after.txt"); /* print symboltable after updated by interp */
     }
 
     //Non Terminal PROGIDENTIFIER is fully implemented here, leave it as-is.        
@@ -121,9 +124,9 @@ public class Syntactic
         if (anyErrors) {
             return -1;
         }
+
         trace("Block", true);
 
-        
         if(token.code == lex.codeFor("__VAR") && firstDecSec){
             recur = VariableDecSec();
             firstDecSec = false;
@@ -137,10 +140,12 @@ public class Syntactic
 
 
     /*
-     * Updated in Syntax B. content of this used to be in the Block method, was split out ini order to match cfg given in in part B
+     * Updated in Syntax B. content of this used to be in the Block method, was split out in order to match cfg given in in part B
      * Also updated to handle resynching after an error is found. This will handle the given UNTIL by flushing out the rest of the
      * statement after UNTIL, and then moving onto the next statement. Will also handle skipping and extra ;, because the logic here skips that
      * check in the first place. 
+     * 
+     * Not changed in Code Generation
      */
     private int BlockBody(){
         int recur = 0; 
@@ -186,7 +191,7 @@ public class Syntactic
 
         } 
         else {
-            error(lex.reserveFor("BEGIN"), token.lexeme);   //update for var too
+            error(lex.reserveFor("BEGIN"), token.lexeme); 
         }
         
 		trace("BlockBody", false);
@@ -197,7 +202,7 @@ public class Syntactic
     //Not a NT, but used to shorten Statement code body for readability.   
     //<variable> $COLON-EQUALS <simple expression>
     private int handleAssignment() {
-        int left = 0;
+        int left = 0;   /* CodeGen: changed recur to left and right. returns left. */
         int right = 0;
         if (anyErrors) {
             return -1;
@@ -209,7 +214,7 @@ public class Syntactic
         if (token.code == lex.codeFor("ASIGN")) {
             token = lex.GetNextToken();
             right = SimpleExpression();
-            quads.AddQuad(interp.opcodeFor("MOV"), right, 0, left);
+            quads.AddQuad(interp.opcodeFor("MOV"), right, 0, left); /* Added quad generation */
         } else {
             error(lex.reserveFor("ASIGN"), token.lexeme);
         }
@@ -243,6 +248,8 @@ public class Syntactic
      * on a single line, as well as more subsequent lines of delarations. 
      * 
      * CFG: <variable-declaration> -> {<identifier> {$COMMA <identifier>}* $COLON <simple type> $SEMICOLON}+
+     * 
+     * unchanged in code gen
      */
     private int VariableDeclaration(){
         int recur = 0;   
@@ -321,23 +328,25 @@ public class Syntactic
      * sandwiched between two simple expressions
      * 
      * CFG: <relexpression> -> <simple expression> <relop> <simple expression>
+     * 
+     * CodeGen: added more int values, addedd quad generation, changed logic. 
      */
     private int RelExpression(){
-        int left, right, saveRelop, recur, temp;
+        int left, right, saveRelop, recur, temp;    
         if (anyErrors) { 
             return -1;
         }
 
         trace("RelExpression", true);
 		
-        left = SimpleExpression(); //get left operand
-        saveRelop = Relop();    //<relop>
-        right = SimpleExpression(); //get right operand
-        temp = GenSymbol();
+        left = SimpleExpression();      //get left operand
+        saveRelop = Relop();            //save relational operator
+        right = SimpleExpression();     //get right operand
+        temp = symbolList.GenSymbol();  //add temporary symbol
 
-        quads.AddQuad(interp.opcodeFor("SUB"), left, right, temp);
-        recur = quads.NextQuad();
-        quads.AddQuad(relopToOpcode(saveRelop), temp, 0, 0);
+        quads.AddQuad(interp.opcodeFor("SUB"), left, right, temp); /* Added quad generation using new ints */
+        recur = quads.NextQuad();        /* store the location of the next quad slot */
+        quads.AddQuad(relopToOpcode(saveRelop), temp, 0, 0);    /* Added quad generation */
 
 		trace("RelExpression", false);
     
@@ -346,10 +355,11 @@ public class Syntactic
 
     /*
      * This method is called to handle a simple expression after an assignment token is found by
-     * handleAssignment. It starts by checking if a sign is given, if no sign is given, it defaults
-     * to positive. Then, the non-terminal Term is called. After the term is returned, it adjusts recur
-     * based on the sign. Next, it loops until it no longer finds an Addop and a Term and no errors are found.
-     * It then adjusts recur again.
+     * handleAssignment. 
+     * 
+     * CodeGen: added separate return values for sign and term on left. if negative, adds negation quad.
+     *          within loop, interprete the opcode for either add or sub. call term for right side.
+     *          Get a temporary symbol, and add a quad based on new info. returns the left value.
      * 
      * CFG: <simple expression> -> [<sign>] <term> {<addop> <term>}*
      */
@@ -377,8 +387,8 @@ public class Syntactic
             }
             token = lex.GetNextToken();
             right = Term();
-            temp = GenSymbol();
-            quads.AddQuad(opcode, left, right, temp);
+            temp = symbolList.GenSymbol();
+            quads.AddQuad(opcode, left, right, temp);   /* added quad generation */
             left = temp;
         }
         
@@ -389,8 +399,10 @@ public class Syntactic
     /*
      * This method is called inside of SimpleExpression and handles the non-terminal "Term"
      * It first calls Factor, and then loops until it no longer finds a Mulop and a Factor
-     * and no errors are found. It then adjusts recur using the Mulop, based on the returned 
-     * Factor. It also makes makes sure that it doesnt divide by 0.
+     * and no errors are found.
+     * 
+     * CodeGen: interprets opcode for mul or div. calls factor again, gets a temporary 
+     *          symbol, and adds quad with new info
      * 
      * CFG: <term> -> <factor> {<mulop> <factor>}*
      */
@@ -416,8 +428,8 @@ public class Syntactic
             }
             token = lex.GetNextToken();
             factor = Factor();
-            temp = GenSymbol();
-            quads.AddQuad(opcode, recur, factor, temp);
+            temp = symbolList.GenSymbol();
+            quads.AddQuad(opcode, recur, factor, temp); /* added quad generation */
             recur = temp;
         }
         
@@ -433,6 +445,8 @@ public class Syntactic
      * the expression inside of the "()". After the expression is handled, it will check for a ')'
      * and throw an error if it is not found. If it finds none of these in the original check, it will
      * also throw an error. 
+     * 
+     * Unchanged in codegen.
      * 
      * CFG: <factor> -> <unsigned constant> | <variable> | $LPAR <simple expression> $RPAR
      */
@@ -471,20 +485,6 @@ public class Syntactic
         return recur;
 
     } 
-    
-    private int GenSymbol(){
-        int recur = 0; 
-        if (anyErrors) { 
-            return -1;
-        }
-
-        trace("GenSymbol", true);
-
-        recur = symbolList.AddSymbol("@" + tCount++, 'V', 0);
-        
-		trace("GenSymbol", false);
-        return recur;
-    } 
 
     /*
      * Handles the Sign non-terminal. Will return the code based on the sign, and get the next token
@@ -517,6 +517,8 @@ public class Syntactic
      * Handles the Addop non-terminal. Will save the code based on the input, and get the next token.
      * Called inside of SimpleExpression.
      * 
+     * As of codegen, this isnt used. 
+     * 
      * CFG: <addop> -> $PLUS | $MINUS
      */
     private int Addop(){
@@ -543,6 +545,8 @@ public class Syntactic
      /*
      * Handles the Mulop non-terminal. Will save the code based on the input, and get the next token.
      * Called inside of Term.
+     * 
+     * As of codegen, this isnt used
      * 
      * CFG: <mulop> -> $MULTIPLY | $DIVIDE
      */
@@ -571,6 +575,8 @@ public class Syntactic
     /*
      * Added in part B, handles returning a relational operator, including:
      * =, <, >, <>, <=, >=. 
+     * 
+     * Unchanged in codegen
      * 
      * CFG: <relop> -> $EQ | $LSS | $GTR | $NEQ | $LEQ | $GEQ
      */
@@ -611,6 +617,11 @@ public class Syntactic
         return recur;
     } 
     
+    /* 
+     * Added in codegen. This will return the 'false' jump that is 
+     * associated with a passed relational operator. Implemented 
+     * according to table shown in assignment
+     */
     private int relopToOpcode(int relop)
     {
         int result = 0;
@@ -630,8 +641,11 @@ public class Syntactic
 
         return result;
     }
+
     /*
      * Added in B. Handles type checking for a string constant.
+     * 
+     * as of codegen, this is not used
      */
     private int StringConstant(){
         int recur = 0;  
@@ -675,9 +689,9 @@ public class Syntactic
 
     /*
      * This method handles the non-terminal "UnsignedNumber" and is called inside "UnsignedConstant"
-     * It checks if the token is an Integer or a Float. If its an integer, it parses it, adds it to recur,
-     * and gets the next token. If its a Float, it parses it as a double. For now, nothing is done with this
-     * result because the return type is an integer, and the return value is ignored for now. 
+     * It checks if the token is an Integer or a Float. 
+     * 
+     * CodeGen: It then returns the symbol table index of that number, and gets the next token.
      * 
      * CFG: <unsigned number> -> $FLOAT | $INTEGER
      */
@@ -690,7 +704,7 @@ public class Syntactic
         trace("UnsignedNumber", true);
 		
         if(token.code == lex.codeFor("INTGR") || token.code == lex.codeFor("FLOAT")){
-            recur = symbolList.LookupSymbol(token.lexeme); 
+            recur = symbolList.LookupSymbol(token.lexeme); /* returns symbol table index */
             token = lex.GetNextToken();
         }
         else{
@@ -705,6 +719,8 @@ public class Syntactic
      * Added in B, handles most of the logic for statements. This method will check for an idenifier, just like before,
      * but it will also now check for every other type of statment start, including:
      * Begin, If, DoWhile, Repeat, For, Writeln, and Readln.
+     * 
+     * Unchanged in codegen
      * 
      * CFG is shown above main. 
      */
@@ -754,6 +770,9 @@ public class Syntactic
      * Handles the If startment start. Starts by looking for a relexpression, then a subsequent then block, 
      * then an optional else block.
      * 
+     * CodeGen: calls relexpression. saves backfill quads, adds a new jmp quad, and updates the jumpvalue 
+     *          for quads
+     * 
      * CFG: $IF <relexpression> $THEN <statement> [$ELSE <statement>]
      */
     private int handleIf(){
@@ -773,13 +792,14 @@ public class Syntactic
             recur = Statement();
             if(token.code == lex.codeFor("_ELSE")){
                 token = lex.GetNextToken();
-                patchElse = quads.NextQuad();                   /* save backfill quad to jump past else, target unknown */
-                quads.UpdateJump(branchQuad, quads.NextQuad()); /* conditional jump */
-                recur = Statement();                            /* else body quads */
-                quads.UpdateJump(patchElse, quads.NextQuad());
+                patchElse = quads.NextQuad();                     /* save backfill quad to jump past else, target unknown */
+                quads.AddQuad(interp.opcodeFor("JMP"), 0, 0, 0);  /* Add a jmp quad */
+                quads.UpdateJump(branchQuad, quads.NextQuad());   /* conditional jump */
+                recur = Statement();                              /* else body quads */
+                quads.UpdateJump(patchElse, quads.NextQuad());    /* update jump */
             }
             else{   /* no else encountered */
-                quads.UpdateJump(branchQuad, quads.NextQuad());
+                quads.UpdateJump(branchQuad, quads.NextQuad());   /* update jump */
             }
         }
         else{   /* no then encountered */
@@ -793,6 +813,8 @@ public class Syntactic
     /*
      * Handles do while statement start. First, a relexpression, and then a statement. 
      * 
+     * CodeGen: added quad interpretation.
+     * 
      * CFG: $DOWHILE <relexpression> <statement>
      */
     private int handleWhile(){
@@ -805,13 +827,13 @@ public class Syntactic
         trace("handleWhile", true);
 		
         token = lex.GetNextToken();
-        saveTop = quads.NextQuad();
-        branchQuad = RelExpression();
+        saveTop = quads.NextQuad(); /* saves the location of loop top quad */
+        branchQuad = RelExpression(); /* get loop condition */
 
         if(token.code == lex.codeFor("BEGIN")){
             recur = Statement();
-            quads.AddQuad(interp.opcodeFor("JMP"), 0, 0, saveTop);  /* jump to top of loop */
-            quads.UpdateJump(branchQuad, quads.NextQuad()); /* Conditional jumps next quad */
+            quads.AddQuad(interp.opcodeFor("JMP"), 0, 0, saveTop);      /* add jmp quad to jmp to top of loop */
+            quads.UpdateJump(branchQuad, quads.NextQuad());             /* Conditional jumps next quad */
         }
         else{
             error(lex.reserveFor("BEGIN"), token.lexeme);
@@ -883,7 +905,8 @@ public class Syntactic
 
     /*
      * Handles writeln statement start. This looks for (, then an ideentifier, then a ).
-     * This is modified according to the given annoucment saying to omit the capability for simpleexpressions.
+     * 
+     * CodeGen: added quad generation.
      * 
      * modified CFG: WRITELN $LPAR (<identifier> |<stringconst>) $RPAR
      */
@@ -900,13 +923,13 @@ public class Syntactic
         if(token.code == lex.codeFor("LPREN")){
             token = lex.GetNextToken();
             if(token.code == lex.codeFor("STRNG") || token.code == lex.codeFor("IDENT")){
-                toPrint = symbolList.LookupSymbol(token.lexeme);
+                toPrint = symbolList.LookupSymbol(token.lexeme);    /* store symbol index for ident or string */
                 token = lex.GetNextToken();
             }
             else{
                 toPrint = SimpleExpression();
             }
-            quads.AddQuad(interp.opcodeFor("PRINT"), 0, 0, toPrint);
+            quads.AddQuad(interp.opcodeFor("PRINT"), 0, 0, toPrint);    /* added quad generation */
             if(token.code == lex.codeFor("RPREN")){
                 token = lex.GetNextToken();
             }
@@ -938,7 +961,7 @@ public class Syntactic
         if(token.code == lex.codeFor("LPREN")){
             token = lex.GetNextToken();
             recur = Variable();
-            quads.AddQuad(interp.opcodeFor("READ"), 0, 0, recur);
+            quads.AddQuad(interp.opcodeFor("READ"), 0, 0, recur);   /* added quad generation */
             if(token.code == lex.codeFor("RPREN")){
                 token = lex.GetNextToken();
             }
